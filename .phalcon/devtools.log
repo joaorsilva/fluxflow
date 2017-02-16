@@ -1,0 +1,2 @@
+Sun 5 12:26:46 joao-System-Product-Name php: [ERROR] 1045: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO) in /var/www/sites/phalcon-devtools/scripts/Phalcon/Initializable.php on line 542
+Sun 5 12:27:00 joao-System-Product-Name php: [ERROR] 1045: SQLSTATE[HY000] [1045] Access denied for user 'root'@'localhost' (using password: NO) in /var/www/sites/phalcon-devtools/scripts/Phalcon/Initializable.php on line 542

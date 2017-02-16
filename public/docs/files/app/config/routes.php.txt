@@ -1,0 +1,114 @@
+<?php
+
+$router = $di->getRouter();
+
+foreach ($application->getModules() as $key => $module) {
+    //Api routes are configured separately.
+    
+    if($key == 'api')
+    {
+        continue;
+    }
+    //var_dump($key);var_dump($module);die;
+    $namespace = preg_replace('/Module$/', 'Controllers', $module["className"]);
+    $router->add('/'.$key.'/:params', [
+        'namespace' => $namespace,
+        'module' => $key,
+        'controller' => 'index',
+        'action' => 'index',
+        'params' => 1
+    ])->setName($key);
+    $router->add('/'.$key.'/:controller/:params', [
+        'namespace' => $namespace,
+        'module' => $key,
+        'controller' => 1,
+        'action' => 'index',
+        'params' => 2
+    ]);
+    $router->add('/'.$key.'/:controller/:action/:params', [
+        'namespace' => $namespace,
+        'module' => $key,
+        'controller' => 1,
+        'action' => 2,
+        'params' => 3
+    ]);
+}
+
+/**
+ * ------------------------------------------------------
+ * Api module routes
+ * ------------------------------------------------------
+ */
+$modules = $application->getModules();
+
+if(array_key_exists('api', $modules)) {
+    
+    $namespace = preg_replace('/Module$/', 'Controllers', 'Fluxflow\Modules\Api\Module');
+    
+    /**
+     * Api default (Api documentation)
+     */
+    $router->add('/api', [
+        'namespace' => $namespace,
+        'module' => 'api',
+        'controller' => 'index',
+        'action' => 'index',
+        'params' => 1
+        ])->setName('api');
+
+    $router->add('/api/', [
+        'namespace' => $namespace,
+        'module' => 'api',
+        'controller' => 'index',
+        'action' => 'index',
+        'params' => 1
+        ])->setName('api');
+
+    /**
+     * Api get operations
+     */
+    $router->addGet('/api/:controller/([0-9])/:params', [
+            'namespace' => $namespace,
+            'module' => 'api',
+            'controller' => 1,
+            'action' => 'get',
+            'id' => 2,
+            'params' => 3
+        ]);
+
+    /**
+     * Api new operations
+     */
+    $router->addPost('/api/:controller', [
+            'namespace' => $namespace,
+            'module' => 'api',
+            'controller' => 1,
+            'action' => 'new',
+            'params' => NULL
+        ]);
+
+    /**
+     * Api update operations
+     */
+    $router->addPut('/api/:controller/:params', [
+            'namespace' => $namespace,
+            'module' => 'api',
+            'controller' => 1,
+            'action' => 'update',
+            'params' => 1
+        ]);
+
+    /**
+     * Api delete operations
+     */
+    $router->addDelete('/api/:controller/:params', [
+            'namespace' => $namespace,
+            'module' => 'api',
+            'controller' => 1,
+            'action' => 'delete',
+            'params' => 1
+        ]);
+
+}
+
+

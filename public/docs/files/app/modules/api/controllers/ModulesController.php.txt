@@ -1,0 +1,83 @@
+<?php
+
+namespace Fluxflow\Modules\Api\Controllers;
+
+use Phalcon\Http\Response;
+
+class ModulesController  extends ControllerBase 
+{   
+    
+    
+    public function initialize()
+    {
+        parent::initialize(__CLASS__);
+    }
+
+    public function indexAction()
+    {
+        $response = new Response();
+        $response->setJsonContent(
+            [
+                "status" => "FOUND",
+                "data" => "Modules::index"
+            ]    
+        );
+        return $response;
+    }
+    
+    public function getAction($id)
+    {
+        $pageNumber = $this->request->getQuery('page','int');
+        $pageSize = $this->request->getQuery('page_size','int');
+        var_dump($pageNumber);
+        var_dump($pageSize);
+        var_dump($this->request->getQuery('filter','string'));
+        var_dump($id);
+        die;
+        $response = new Response();
+        $response->setJsonContent(
+            [
+                "status" => "FOUND",
+                "data" => "Modules::get"
+            ]    
+        );
+        return $response;        
+    }
+    
+    public function newAction()
+    {
+        $response = new Response();
+        $response->setJsonContent(
+            [
+                "status" => "FOUND",
+                "data" => "Modules::new"
+            ]    
+        );
+        return $response;        
+    }
+    
+    public function updateAction()
+    {
+        $response = new Response();
+        $response->setJsonContent(
+            [
+                "status" => "FOUND",
+                "data" => "Modules::update"
+            ]    
+        );
+        return $response;        
+    }
+    
+    public function deleteAction()
+    {
+        $response = new Response();
+        $response->setJsonContent(
+            [
+                "status" => "FOUND",
+                "data" => "Modules::delete"
+            ]    
+        );
+        return $response;        
+    }
+}
+
