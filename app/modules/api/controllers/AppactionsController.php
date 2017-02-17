@@ -127,6 +127,11 @@ class AppactionsController extends ControllerBase
         $resource->app_controllers_id = $post['app_controllers_id'];
         $resource->name = $post['name'];
         $resource->key = $post['key'];
+        $resource->secured = 0;
+        if(isset($post['secured']))
+        {
+            $resource->secured = 1;
+        }
         $resource->active = 1;
         
         if( isset($post['active']) )
@@ -180,6 +185,12 @@ class AppactionsController extends ControllerBase
             $resource->app_controllers_id = $post['app_controllers_id'];
             $resource->name = $post['name'];
             $resource->key = $post['key'];
+            $resource->secured = 0;
+            if(isset($post['secured']))
+            {
+                $resource->secured = 1;
+            }
+            $resource->active = 1;
             if( isset($post['active']) )
             {
                 $resource->active = $post['active'];

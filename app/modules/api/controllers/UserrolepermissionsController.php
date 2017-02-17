@@ -114,6 +114,7 @@ class UserrolepermissionsController extends ControllerBase
         $post = $this->request->getJsonRawBody(TRUE);
         if( 
             !$post
+            || !isset($post['unit_organizations_id'])
             || !isset($post['app_modules_id'])
             || !isset($post['app_controllers_id'])
             || !isset($post['app_actions_id'])
@@ -124,6 +125,7 @@ class UserrolepermissionsController extends ControllerBase
         
         $resource = new UserRolePermissions();
         $resource->setUserId($this->userId);
+        $resource->unit_organizations_id = $post['unit_organizations_id'];
         $resource->app_modules_id = $post['app_modules_id'];
         $resource->app_controllers_id = $post['app_controllers_id'];
         $resource->app_actions_id = $post['app_actions_id'];
@@ -179,6 +181,7 @@ class UserrolepermissionsController extends ControllerBase
         else 
         {
             $record->setUserId($this->userId);
+            $resource->unit_organizations_id = $post['unit_organizations_id'];
             $resource->app_modules_id = $post['app_modules_id'];
             $resource->app_controllers_id = $post['app_controllers_id'];
             $resource->app_actions_id = $post['app_actions_id'];

@@ -2,7 +2,9 @@
 <?php
 if(isset($area) && $area == "error")
 {
-    
+    ?>
+    <?= $this->getContent() ?>
+    <?php
 } 
 else if(isset($area) && $area == "login")
 {

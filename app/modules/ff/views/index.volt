@@ -2,7 +2,9 @@
 <?php
 if(isset($area) && $area == "error")
 {
-    
+    ?>
+    {{ content() }}
+    <?php
 } 
 else if(isset($area) && $area == "login")
 {

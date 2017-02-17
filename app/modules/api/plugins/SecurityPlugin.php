@@ -24,43 +24,51 @@ class SecurityPlugin extends Plugin
      */
     public function getAcl()
     {
-        if (!isset($this->persistent->acl)) 
-        {
+        /*if (!isset($this->persistent->acl)) 
+        {*/
             $acl = new AclList();
 
             $acl->setDefaultAction(Acl::DENY);
 
             $permissions = $this->findResources();
+            $roles = $this->findRoles();
+            $organizations = $this->findOrganizations();
             
             // Register roles
-            foreach($permissions['secured'] as $key=>$value)
+            foreach($roles as $role)
             {
-                $acl->addRole(new Role($key,''));
+                $acl->addRole(new Role($role['unit_organizations_id'] . strtolower($role['name']),$role['description']));
             }
 
-            foreach ($permissions['secured'] as $role => $modules)
+            foreach ($permissions['secured'] as $module => $controllers)
             {
-                foreach($modules as $module=>$controllers)
+                foreach($controllers as $controller => $actions)
                 {
-                    foreach($controllers as $controller=>$actions) {
-                        $mod = $module;
-                        $ctrl = $controller;
-                        $resourceName = $mod . "/" . $ctrl;
+                    foreach($actions as $action=>$roles) 
+                    {
+                        $resourceName = $module . "/" . $controller;
+                        
                         $resource = new Resource($resourceName);
-                        $acl->addResource($resource, $actions);
-                        //var_dump($resource);
-                        foreach($actions as $action)
+                        
+                        foreach($organizations as $org)
                         {
-                            $acl->allow($role,$resourceName,$action);
+                            $acl->addResource($resource, $action);
+                        }
+
+                        foreach($roles as $role)
+                        {
+                            if($role['organization'] == NULL || $role['role'] == NULL)
+                                continue;
+                            
+                            $acl->allow($role['organization'] . $role['role'],$resourceName,$action);
                         }
                     }
                 }
             }
-            
             //The acl is stored in session, APC would be useful here too
             $this->persistent->acl = $acl;
-        }
-
+        //}
+        
         return $this->persistent->acl;
     }
     
@@ -74,8 +82,8 @@ class SecurityPlugin extends Plugin
     public function beforeDispatch(Event $event, Dispatcher $dispatcher)
     {
         $auth = $this->session->get('auth');
-        
         $module =  $dispatcher->getModuleName();
+        //print_r($module);die("aqui");
         if($module == 'frontend') {
             //Frontend module dosen't need security
             return TRUE;
@@ -93,25 +101,36 @@ class SecurityPlugin extends Plugin
         }
         
         $allowed = FALSE;
+        $auth['user']['autorized']['condition'] = FALSE;
+        $auth['user']['autorized']['path'] = $resourceName . "/" . $action;
         foreach($auth['user']['organizations'][$auth['user']['currentorganization']] as $role)
         {
-            $allowed = $acl->isAllowed($role, $resourceName, $action);
+            $allowed = $acl->isAllowed($auth['user']['currentorganization'].$role, $resourceName, $action);
+            if($allowed) {
+                $auth['user']['autorized']['role'] = $role;
+                $auth['user']['autorized']['organization'] = $auth['user']['currentorganization'];
+                $auth['user']['autorized']['condition'] = TRUE;
+                break;
+            }
         }
         
         if(!$allowed) 
         {
             foreach($auth['user']['organizations'] as $organization => $role)
             {
-                $auth['user']['organizationlist'] = array();
-                $orgAllowed = $acl->isAllowed($role, $resourceName, $action);
+                $orgAllowed = $acl->isAllowed($organization.$role, $resourceName, $action);
                 if($orgAllowed)
                 {
                     $auth['user']['currentorganization'] = $organization;
                     $auth['user']['organizationlist'][$organization] = array();
+                    $auth['user']['autorized']['role'] = $role;
+                    $auth['user']['autorized']['organization'] = $organization;
+                    $auth['user']['autorized']['condition'] = TRUE;
                     $allowed = TRUE;
                 }
             }            
         }
+        //print_r($auth);die;
         if (!$allowed) 
         {
             if ( $module == "api" || $controller == "api")
@@ -125,11 +144,25 @@ class SecurityPlugin extends Plugin
             } 
             else if($module == "ff" || $controller == "ff")
             {
-                $dispatcher->forward([
-                        'module'        => 'ff',
-                        'controller'    => 'login',
-                        'action'        => 'index'
-                ]);
+                if($auth['user']) 
+                {
+                    //echo("401");die;
+                    $dispatcher->forward([
+                            'module'        => 'ff',
+                            'controller'    => 'error',
+                            'action'        => 'show401'
+                    ]);
+                }
+                else
+                {
+                    //echo("login");die;
+                    $dispatcher->forward([
+                            'module'        => 'ff',
+                            'controller'    => 'login',
+                            'action'        => 'index'
+                    ]);
+                    $this->session->destroy();
+                }
             }
             else 
             {
@@ -140,7 +173,7 @@ class SecurityPlugin extends Plugin
                 ]);
             }
             
-            $this->session->destroy();
+            //
             return FALSE;
         }
         else
@@ -171,8 +204,8 @@ class SecurityPlugin extends Plugin
         }
         //var_dump($module . " - " . $controller . " - " . $action);
         //var_dump($allowed);
-        print_r($auth);
-        die("aqui");
+        //print_r($auth);
+        //die("aqui");
 
         return TRUE;
     }
@@ -220,12 +253,42 @@ class SecurityPlugin extends Plugin
             {
                 $key = 'secured';                
             }
-            $permissions[$key][strtolower($row['module'])][strtolower($row['controller'])][strtolower($row['action'])] = [
+            $permissions[$key][strtolower($row['module'])][strtolower($row['controller'])][strtolower($row['action'])][] = [
                 'organization'  => $row['unit_organizations_id'],
-                'role'          => $row['role']
+                'role'          => strtolower($row['role'])
             ];
         }
-        
+        //print_r($permissions);die;
         return $permissions;
-    }    
+    }
+
+    public function findRoles()
+    {
+        $sql = "SELECT
+                name, description, unit_organizations_id
+                FROM 
+                user_roles
+                WHERE
+                active > 0
+                AND deleted = 0";
+        
+        $query = $this->db->query($sql);
+        $query->setFetchMode(\Phalcon\Db::FETCH_ASSOC);
+        return $query->fetchAll();
+    }
+    
+    public function findOrganizations()
+    {
+        $sql = "SELECT
+                id
+                FROM 
+                unit_organizations
+                WHERE
+                active > 0
+                AND deleted = 0";
+        
+        $query = $this->db->query($sql);
+        $query->setFetchMode(\Phalcon\Db::FETCH_ASSOC);
+        return $query->fetchAll();        
+    }
 }
