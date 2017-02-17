@@ -24,7 +24,7 @@ class LoginController extends ControllerBase
     public function initialize()
     {
         $this->view->area = "login";
-        $this->tag->title = "Login | Flux Flow";
+        $this->tag->title = "Login | ";
         $this->view->js = [
             "/vendors/validator/validator.js",
             "/js/modules/ff/login/login.js"

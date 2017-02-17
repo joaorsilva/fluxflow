@@ -17,7 +17,7 @@ else if(isset($area) && $area == "login")
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title><?php echo($this->tag->title) ?></title>
+    <title><?php echo($this->tag->title . $this->tag->appName) ?></title>
 
     <!-- Bootstrap -->
     <link href="/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -27,7 +27,17 @@ else if(isset($area) && $area == "login")
     <link href="/vendors/nprogress/nprogress.css" rel="stylesheet">
     <!-- Animate.css -->
     <link href="/vendors/animate.css/animate.min.css" rel="stylesheet">
-
+<?php
+    if(isset($css) && is_array($css))
+    {
+        foreach($css as $script)
+        {
+?>
+    <link href="<?php echo($script) ?>" rel="stylesheet" />
+<?php
+        }
+    }
+?>
     <!-- Custom Theme Style -->
     <link href="/build/css/custom.css" rel="stylesheet">
   </head>
@@ -60,7 +70,7 @@ else if(isset($area) && $area == "login")
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Gentelella Alela! | </title>
+    <title><?php echo($this->tag->title . $this->tag->appName) ?></title>
 
     <!-- Bootstrap -->
     <link href="/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -68,7 +78,17 @@ else if(isset($area) && $area == "login")
     <link href="/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <!-- NProgress -->
     <link href="/vendors/nprogress/nprogress.css" rel="stylesheet">
-
+<?php
+    if(isset($css) && is_array($css))
+    {
+        foreach($css as $script)
+        {
+?>
+    <link href="<?php echo($script) ?>" rel="stylesheet" />
+<?php
+        }
+    }
+?>
     <!-- Custom Theme Style -->
     <link href="/build/css/custom.min.css" rel="stylesheet">
   </head>
@@ -206,7 +226,7 @@ else if(isset($area) && $area == "login")
               <a data-toggle="tooltip" data-placement="top" title="Lock">
                 <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
               </a>
-              <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+              <a class="logout" data-toggle="tooltip" data-placement="top" title="Logout" href="javascript:void(0);">
                 <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
               </a>
             </div>
@@ -243,6 +263,19 @@ else if(isset($area) && $area == "login")
     
     <!-- Custom Theme Scripts -->
     <script src="/build/js/custom.min.js"></script>
+<?php
+    if(isset($js) && is_array($js))
+    {
+        foreach($js as $cript)
+        {
+?>
+    <script src="<?php echo($cript) ?>"></script>
+<?php
+        }
+    }
+?>
+    <!-- Layout Scripts -->
+    <script src="/js/modules/ff/layout/index.js"></script>
   </body>
 </html>
 <?php }?>

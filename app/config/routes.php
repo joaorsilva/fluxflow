@@ -66,7 +66,7 @@ $router->addGet(
 );
 
 /**
- * Backend routes
+ * Ff routes
  */
 
 $router->add(
@@ -88,6 +88,28 @@ $router->add(
         "controller"    => 1,
         "action"        => "index",
         "params"        => 2,
+    ]
+);
+
+$router->add(
+    "/ff/:controller/edit/([0-9]+)",
+    [
+        "namespace"     => "Fluxflow\Modules\Ff\Controllers",
+        "module"        => "ff",
+        "controller"    => 1,
+        "action"        => "edit",
+        "id"            => 2,
+    ]
+);
+
+$router->add(
+    "/ff/:controller/view/([0-9]+)",
+    [
+        "namespace"     => "Fluxflow\Modules\Ff\Controllers",
+        "module"        => "ff",
+        "controller"    => 1,
+        "action"        => "view",
+        "id"            => 2,
     ]
 );
 

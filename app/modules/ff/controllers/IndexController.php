@@ -27,6 +27,6 @@ class IndexController extends ControllerBase {
     
     public function indexAction()
     {
-        
+        $this->tag->title = "Dashboard | ";
     }
 }

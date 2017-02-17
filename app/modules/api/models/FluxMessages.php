@@ -83,6 +83,13 @@ class FluxMessages extends \Phalcon\Mvc\Model
     
     /**
      *
+     * @var string
+     * @Column(type="string", nullable=false)
+     */
+    public $read_date;
+
+    /**
+     *
      * @var integer
      * @Column(type="integer", length=1, nullable=false)
      */
@@ -218,6 +225,7 @@ class FluxMessages extends \Phalcon\Mvc\Model
             'destination_id' => 'destination_id',
             'subject' => 'subject',
             'message' => 'message',
+            'read_date' => 'read_date',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',

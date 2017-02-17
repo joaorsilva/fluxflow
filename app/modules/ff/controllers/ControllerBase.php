@@ -23,9 +23,13 @@ use Phalcon\Mvc\Controller;
 
 class ControllerBase extends Controller
 {
+    public $user;
+    
     public function initialize()
     {
         $this->tag->appName = "Flux Flow";
+        $auth = $this->session->get('auth');
+        $this->user = $auth['user'];
     }
 
 }

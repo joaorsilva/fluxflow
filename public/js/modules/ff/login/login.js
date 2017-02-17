@@ -18,7 +18,6 @@ $(document).ready( function() {
                     email: $("#login-email").val(),
                     password: $("#login-password").val()
                 }),
-                dataType: "json",
                 error: function(xhr, ajaxOptions, thrownError)
                 {
                     if(!!xhr.status)
