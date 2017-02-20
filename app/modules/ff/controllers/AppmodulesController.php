@@ -24,18 +24,27 @@ use Phalcon\Http\Request as Request;
 
 class AppmodulesController extends ControllerBase 
 {
+    public $titleSinglular = "Modules";
+    public $titlePlural = "Modules";
+    
     public function indexAction()
     {
-        $this->tag->title = "Modules | ";
+        $this->tag->h3 = $this->titlePlural;
+        $this->tag->title = $this->tag->h3 . " | ";
+        $this->tag->h2 = "List of " . $this->titlePlural;
     }
     
     public function viewAction()
     {
-        $this->tag->title = "View Module | ";
+        $this->tag->h3 = "View " . $this->titleSinglular;
+        $this->tag->title = $this->tag->h3 . " | ";
+        $this->tag->h2 = $this->titleSinglular;
     }
     
     public function editAction()
     {
-        $this->tag->title = "Edit Module | ";
+        $this->tag->h3 = "Edit " . $this->titleSinglular;
+        $this->tag->title = $this->tag->h3 . " | ";
+        $this->tag->h2 = $this->titleSinglular;
     }
 }
