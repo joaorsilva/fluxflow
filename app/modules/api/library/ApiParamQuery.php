@@ -58,7 +58,7 @@ class ApiParamQuery
         $queryParams = array();
         if( $conditions ) 
         {
-            $conditions = substr($condition, 0, -4);
+            $conditions = substr($conditions, 0, -4);
             $queryParams['conditions'] = $conditions;
             $queryParams['bind'] = $bind;
         }

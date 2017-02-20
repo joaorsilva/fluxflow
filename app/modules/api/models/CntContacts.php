@@ -21,8 +21,9 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class CntContacts extends \Phalcon\Mvc\Model
+class CntContacts extends BaseModel
 {
     /**
      *
@@ -41,7 +42,13 @@ class CntContacts extends \Phalcon\Mvc\Model
      */
     public $unit_organizations_id;
     
-    
+    /**
+     *
+     * @var integer 
+     * @Column(type="integer", length=10, nullable=true)
+     */
+    public $user_users_id;
+        
     /**
      *
      * @var string 
@@ -127,7 +134,10 @@ class CntContacts extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSchema("fluxflow");
+        $this->setSource('cnt_contacts');
+        
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
+        $this->belongsTo('user_users_id', '\UserUsers', 'id', ['alias' => 'UserUsers']);
         $this->hasMany('id', 'CntAddresses', 'cnt_contacts_id', ['alias' => 'CntAddresses']);
         $this->hasMany('id', 'CntEmails', 'cnt_contacts_id', ['alias' => 'CntEmails']);
         $this->hasMany('id', 'CntPhones', 'cnt_contacts_id', ['alias' => 'CntPhones']);
@@ -135,59 +145,11 @@ class CntContacts extends \Phalcon\Mvc\Model
         $this->hasMany('id', 'UnitOrganizations', 'cnt_contacts_id', ['alias' => 'UnitOrganizations']);
     }
 
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
     public function getSource()
     {
         return 'cnt_contacts';
     }
-
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntContacts[]|CntContacts     */
-    public static function find($parameters = null)
-    {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntContacts     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
-
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
         
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
-        
-        $total_rows = parent::count( $countParams );
-        
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
-    }
-
     /**
      * Independent Column Mapping.
      * Keys are the real names in the table and the values their names in the application
@@ -195,10 +157,11 @@ class CntContacts extends \Phalcon\Mvc\Model
      * @return array
      */
     public function columnMap()
-    {
+    {   
         return [
             'id' => 'id',
             'unit_organizations_id' => 'unit_organizations_id',
+            'user_users_id' => 'user_users_id',
             'company_name' => 'company_name',
             'name' => 'name',
             'surename' => 'surename',
@@ -212,5 +175,62 @@ class CntContacts extends \Phalcon\Mvc\Model
             'deleted' => 'deleted'
         ];
     }
-
+    
+    public function findRelated($row)
+    {
+        if($row->unit_organizations_id) 
+        {
+            $row->unit_organizations_id = UnitOrganizations::findFirst($row->unit_organizations_id);
+            
+            $row->cnt_addresses = NULL;
+            $addresses = CntAddresses::findFirst(
+                    [
+                        "conditions" => "unit_organizations_id = ?1 AND cnt_contacts_id = ?2 AND primary > ?3",
+                        "bind" => [
+                            1   => $row->unit_organizations_id->id,
+                            2   => $row->id,
+                            3   => 0
+                        ]
+                    ],TRUE
+                    );
+            if( count($addresses) )
+            {
+                $row->cnt_addresses = $addresses;
+            }
+            
+            $row->cnt_phones = NULL;
+            $phones = CntPhones::findFirst(
+                    [
+                        "conditions" => "unit_organizations_id = ?1 AND cnt_contacts_id = ?2 AND primary > ?3",
+                        "bind" => [
+                            1   => $row->unit_organizations_id->id,
+                            2   => $row->id,
+                            3   => 0
+                        ]
+                    ]
+                    );
+            if( count($phones) )
+            {
+                $row->cnt_phones = $phones;
+            }
+            
+            $row->cnt_emails = NULL;
+            $emails = CntEmails::findFirst(
+                    [
+                        "conditions" => "unit_organizations_id = ?1 AND cnt_contacts_id = ?2 AND primary > ?3",
+                        "bind" => [
+                            1   => $row->unit_organizations_id->id,
+                            2   => $row->id,
+                            3   => 0
+                        ]
+                    ]
+                    );
+            if( count($emails) )
+            {
+                $row->cnt_emails = $emails;
+            }
+            
+        }
+        return $row;
+    }    
 }

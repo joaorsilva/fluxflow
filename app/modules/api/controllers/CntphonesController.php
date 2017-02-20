@@ -31,13 +31,14 @@ class CntphonesController extends ControllerBase
         '_url',
         'pagging',
         'filter',
-        'order'
+        'order',
+        'r'
     );
     
     /*
      * Id of the user performing the operation
      */
-    private $userId = 1;
+    private $user;
     
     /**
      * Initialize the controller once
@@ -54,7 +55,8 @@ class CntphonesController extends ControllerBase
     {
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
-            $this->userId = $auth['user']->id;
+            $this->user = $auth['user'];
+        CntPhones::setUser($this->user);
     }
 
     /**
@@ -67,34 +69,45 @@ class CntphonesController extends ControllerBase
         $requestSetting = array();
         $data = array();
         
-        if( !$this->validateParams( $this->request->getQuery(), $this->validParams ) )
-             $code = 400;
-        
-        if($id)
+        $params = $this->request->getQuery();
+        if( !$this->validateParams( $params, $this->validParams ) )
         {
-            //Single record
-            $record = CntPhones::findFirst($id);
-            if( !$record) 
-                $code = 404;
-            else
-            {
-                $code = 200;
-                $data = ["data" => $record->toArray()];
-            }
+            $code = 400;
         }
-        else 
+        else
         {
-            //Recordset to find
-            $requestSetting = $this->parseSettings( $this->request, CntPhones );
-            
-            $struct = CntPhones::findStructured($requestSetting);
-
-            if( count($struct['result']) == 0)
-                $code = 404;
-            else
+            $relations = FALSE;
+            if(isset($params['r']))
             {
-                $code = 200;
-                $data = ["data" => $struct];    
+                $relations = TRUE;
+            }
+            
+            if($id)
+            {
+                //Single record
+                $record = CntPhones::findFirst($id, $relations);
+                if( !$record) 
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $record->toArray()];
+                }
+            }
+            else 
+            {
+                //Recordset to find
+                $requestSetting = $this->parseSettings( $this->request, CntPhones );
+
+                $struct = CntPhones::findStructured($requestSetting, $relations);
+
+                if( count($struct['result']) == 0)
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $struct];    
+                }
             }
         }
         
@@ -129,12 +142,11 @@ class CntphonesController extends ControllerBase
         $resource->cnt_contacts_id = $post['cnt_contacts_id'];
         $resource->geo_country_id = $post['geo_country_id'];
         $resource->phone = $post['phone'];
+        if(isset($post['primary']))
+            $resource->primary = $post['primary'];        
         $resource->active = 1;
-        
         if( isset($post['active']) )
-        {
             $resource->active = $post['active'];
-        }
         
         if( $resource->create() === FALSE)
         {
@@ -184,10 +196,10 @@ class CntphonesController extends ControllerBase
             $resource->cnt_contacts_id = $post['cnt_contacts_id'];
             $resource->geo_country_id = $post['geo_country_id'];
             $resource->phone = $post['phone'];
+            if(isset($post['primary']))
+                $resource->primary = $post['primary'];
             if( isset($post['active']) )
-            {
                 $resource->active = $post['active'];
-            }
             
             if( $resource->update() === FALSE )
             {

@@ -47,7 +47,7 @@ $router->addGet(
         'module'=>$cdata['module'],
         'controller'=>$cdata['controller'],
         'action'=>'get',
-        'id'=>1
+        'id'=>1,
     ]
 );
 

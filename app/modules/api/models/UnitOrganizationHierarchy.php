@@ -21,8 +21,9 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class UnitOrganizationHierarchy extends \Phalcon\Mvc\Model
+class UnitOrganizationHierarchy extends BaseModel
 {
     /**
      *
@@ -122,57 +123,54 @@ class UnitOrganizationHierarchy extends \Phalcon\Mvc\Model
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
     }
 
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
     public function getSource()
     {
         return 'unit_organization_hierarchy';
     }
 
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return UnitOrganizationHierarchy[]|UnitOrganizationHierarchy     */
-    public static function find($parameters = null)
+    public static function findHierarchy($unit_organizations_id)
     {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return UnitOrganizationHierarchy     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
-
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
+        $res = [
+            "top"   => null,
+            "higher"    => [],
+            "lower"     => []
+        ];
         
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
+        $result = self::findFirst(
+                [
+                    "conditions"    => "unit_organizations_id = ?1 AND unit_parent_child_id = ?2",
+                    "bind"  => [
+                        1   => $unit_organizations_id,
+                        2   => 1
+                    ]
+                ]
+                );
+        if(!$result)
+            return FALSE;
         
-        $total_rows = parent::count( $countParams );
+        $res['top'] = $result->id;
+        $others = self::find(
+                [
+                    "conditions"    => "unit_organizations_id = ?1 AND deleted = ?2",
+                    "bind"  => [
+                        1   => $unit_organizations_id,
+                        2   => 0
+                    ]
+                ]
+                );
         
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
+        foreach($others as $org)
+        {
+            if($org->direction == 0)
+            {
+                $res['higher'][] = $org->unit_parent_child_id;
+                continue;
+            }
+            $res['lower'][] = $org->unit_parent_child_id;
+        }
+        
+        return $res;
+        
     }
 
     /**
@@ -198,5 +196,4 @@ class UnitOrganizationHierarchy extends \Phalcon\Mvc\Model
             'deleted' => 'deleted'
         ];
     }
-
 }

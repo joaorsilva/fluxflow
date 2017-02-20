@@ -32,6 +32,7 @@ class UserusersController extends ControllerBase {
         $this->view->css = [
             "/vendors/bootstrap-daterangepicker/daterangepicker.css"
         ];
+        
         $this->view->js = [
             "/vendors/raphael/raphael.min.js",
             "/vendors/morris.js/morris.min.js",
@@ -41,6 +42,7 @@ class UserusersController extends ControllerBase {
             "/build/js/custom.min.js",
             "/js/modules/ff/userusers/view.js"
         ];
+        
         $this->view->params = [
             'userId'  => $this->user['id'],
             'resourceId' => $id

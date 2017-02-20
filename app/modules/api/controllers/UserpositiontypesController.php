@@ -20,9 +20,9 @@
 namespace Fluxflow\Modules\Api\Controllers;
 
 use Phalcon\Http\Response;
-use Fluxflow\Modules\Api\Models\CntEmails;
+use Fluxflow\Modules\Api\Models\UserPositionTypes;
 
-class CntemailsController extends ControllerBase 
+class UserpositiontypesController extends ControllerBase 
 {
     /*
      * Valid url parameters for get action
@@ -32,7 +32,7 @@ class CntemailsController extends ControllerBase
         'pagging',
         'filter',
         'order',
-        ''
+        'r'
     );
     
     /*
@@ -56,7 +56,7 @@ class CntemailsController extends ControllerBase
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
             $this->user = $auth['user'];
-        CntEmails::setUser($this->user);
+        UserPositionTypes::setUser($this->user);
     }
 
     /**
@@ -70,7 +70,7 @@ class CntemailsController extends ControllerBase
         $data = array();
         
         $params = $this->request->getQuery();
-        if( !$this->validateParams( $params, $this->validParams ) )
+        if( !$this->validateParams($params, $this->validParams ) )
         {
              $code = 400;
         }
@@ -81,11 +81,11 @@ class CntemailsController extends ControllerBase
             {
                 $relations = TRUE;
             }
-            
+
             if($id)
             {
                 //Single record
-                $record = CntEmails::findFirst($id, $relations);
+                $record = UserPositionTypes::findFirst($id, $relations);
                 if( !$record) 
                     $code = 404;
                 else
@@ -97,9 +97,9 @@ class CntemailsController extends ControllerBase
             else 
             {
                 //Recordset to find
-                $requestSetting = $this->parseSettings( $this->request, CntEmails );
+                $requestSetting = $this->parseSettings( $this->request, UserPositionTypes );
 
-                $struct = CntEmails::findStructured($requestSetting, $relations);
+                $struct = UserPositionTypes::findStructured($requestSetting, $relations);
 
                 if( count($struct['result']) == 0)
                     $code = 404;
@@ -110,6 +110,7 @@ class CntemailsController extends ControllerBase
                 }
             }
         }
+        
         return $this->sendResponse($code,$data);        
     }
     
@@ -127,24 +128,20 @@ class CntemailsController extends ControllerBase
         if( 
             !$post
             || !isset($post['unit_organizations_id'])
-            || !isset($post['cnt_contact_types_id'])
-            || !isset($post['cnt_contacts_id'])
-            || !isset($post['email'])
+            || !isset($post['name'])
         ) 
             $code = 400;
         
-        $resource = new CntEmails();
+        $resource = new UserPositionTypes();
         $resource->setUserId($this->userId);
         $resource->unit_organizations_id = $post['unit_organizations_id'];
-        $resource->cnt_contact_types_id = $post['cnt_contact_types_id'];
-        $resource->cnt_contacts_id = $post['cnt_contacts_id'];
-        $resource->email = $post['email'];
-        if(isset($post['primary']))
-            $resource->primary = $post['primary'];
+        $resource->name = $post['name'];
+        $resource->active = 1;
         
-        $resource->active = 1;        
         if( isset($post['active']) )
+        {
             $resource->active = $post['active'];
+        }
         
         if( $resource->create() === FALSE)
         {
@@ -176,27 +173,22 @@ class CntemailsController extends ControllerBase
         if( 
             !$post 
             || !isset($post['unit_organizations_id'])
-            || !isset($post['cnt_contact_types_id'])
-            || !isset($post['cnt_contacts_id'])
-            || !isset($post['email'])
+            || !isset($post['name'])
         )
             $code = 400;
         
-        $resource = CntEmails::findFirst($id);
+        $resource = UserPositionTypes::findFirst($id);
         if( !$record )
             $code = 404;
         else 
         {
             $record->setUserId($this->userId);
             $resource->unit_organizations_id = $post['unit_organizations_id'];
-            $resource->cnt_contact_types_id = $post['cnt_contact_types_id'];
-            $resource->cnt_contacts_id = $post['cnt_contacts_id'];
-            $resource->email = $post['email'];
-            if(isset($post['primary']))
-                $resource->primary = $post['primary'];
-            
+            $resource->name = $post['name'];
             if( isset($post['active']) )
+            {
                 $resource->active = $post['active'];
+            }
             
             if( $resource->update() === FALSE )
             {
@@ -226,7 +218,7 @@ class CntemailsController extends ControllerBase
             $code = 400;
         else 
         {
-            $record = CntEmails::findFirst($id);
+            $record = UnitOrganizations::findFirst($id);
             if( ! $record )
                 $code = 404;
             else 
@@ -253,7 +245,7 @@ class CntemailsController extends ControllerBase
     {
         $data = array();
         
-        $docFile = __DIR__ . "/docs/CntemailsController.php";
+        $docFile = __DIR__ . "/docs/UserpositiontypesController.php";
         if(file_exists($docFile)) {
             include $docFile;
         }
@@ -266,3 +258,4 @@ class CntemailsController extends ControllerBase
     }
 
 }
+

@@ -21,9 +21,8 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
-use Fluxflow\Modules\Api\Models\BaseModel;
 
-class CntContactTypes extends BaseModel
+class UserPositionTypes extends \Phalcon\Mvc\Model
 {
     /**
      *
@@ -50,13 +49,6 @@ class CntContactTypes extends BaseModel
      */
     public $name;
     
-    
-    /**
-     *
-     * @var string 
-     * @Column(type="string", length=45, nullable=false)
-     */
-    public $description_key;
     
     /**
      *
@@ -120,18 +112,63 @@ class CntContactTypes extends BaseModel
     public function initialize()
     {
         $this->setSchema("fluxflow");
-        
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
-        $this->hasMany('id', 'CntAddresses', 'cnt_contact_types_id', ['alias' => 'CntAddresses']);
-        $this->hasMany('id', 'CntEmails', 'cnt_contact_types_id', ['alias' => 'CntEmails']);
-        $this->hasMany('id', 'CntPhones', 'cnt_contact_types_id', ['alias' => 'CntPhones']);
+        $this->hasMany('id', 'UserUsers', 'user_position_types_id', ['alias' => 'UserUsers']);
     }
 
+    /**
+     * Returns table name mapped in the model.
+     *
+     * @return string
+     */
     public function getSource()
     {
-        return 'cnt_contact_types';
+        return 'user_position_types';
     }
-    
+
+    /**
+     * Allows to query a set of records that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return UserRoles[]|UserRoles     */
+    public static function find($parameters = null)
+    {
+        return parent::find($parameters);
+    }
+
+    /**
+     * Allows to query the first record that match the specified conditions
+     *
+     * @param mixed $parameters
+     * @return UserRoles     */
+    public static function findFirst($parameters = null)
+    {
+        return parent::findFirst($parameters);
+    }
+
+    /**
+     * Finds a group of rows based on a criteria
+     * 
+     * @param array $params
+     * @return array
+     */
+    public static function findStructured( array $params )
+    {
+        $queryParams = ApiParamQuery::prepareParams( $params );
+        
+        $countParams = array(
+            'conditions'    => $queryParams['conditions'],
+            'bind'          => $queryParams['bind']
+        );
+        
+        $total_rows = parent::count( $countParams );
+        
+        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
+        $params['result'] = parent::find( $queryParams );
+
+        return $params;
+    }
+
     /**
      * Independent Column Mapping.
      * Keys are the real names in the table and the values their names in the application
@@ -144,7 +181,6 @@ class CntContactTypes extends BaseModel
             'id' => 'id',
             'unit_organizations_id' => 'unit_organizations_id',
             'name' => 'name',
-            'description_key' => 'description_key',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',

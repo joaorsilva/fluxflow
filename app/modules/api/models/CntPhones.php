@@ -21,8 +21,9 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class CntPhones extends \Phalcon\Mvc\Model
+class CntPhones extends BaseModel
 {
     /**
      *
@@ -63,7 +64,7 @@ class CntPhones extends \Phalcon\Mvc\Model
      * @var integer 
      * @Column(type="integer", length=10, nullable=false)
      */
-    public $geo_country_id;
+    public $geo_countries_id;
     
     
     /**
@@ -73,6 +74,13 @@ class CntPhones extends \Phalcon\Mvc\Model
      */
     public $phone;
     
+    /**
+     *
+     * @var integer
+     * @Column(type="integer", length=1, nullable=false)
+     */
+    public $primary;
+
     /**
      *
      * @var integer
@@ -135,65 +143,18 @@ class CntPhones extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSchema("fluxflow");
+        
         $this->belongsTo('cnt_contact_types_id', '\CntContactTypes', 'id', ['alias' => 'CntContactTypes']);
         $this->belongsTo('cnt_contacts_id', '\CntContacts', 'id', ['alias' => 'CntContacts']);
-        $this->belongsTo('geo_country_id', '\GeoCountries', 'id', ['alias' => 'GeoCountries']);
+        $this->belongsTo('geo_countries_id', '\GeoCountries', 'id', ['alias' => 'GeoCountries']);
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
     }
 
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
     public function getSource()
     {
         return 'cnt_phones';
     }
-
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntPhones[]|CntPhones     */
-    public static function find($parameters = null)
-    {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntPhones     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
-
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
-        
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
-        
-        $total_rows = parent::count( $countParams );
-        
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
-    }
-
+    
     /**
      * Independent Column Mapping.
      * Keys are the real names in the table and the values their names in the application
@@ -207,8 +168,9 @@ class CntPhones extends \Phalcon\Mvc\Model
             'unit_organizations_id' => 'unit_organizations_id',
             'cnt_contact_types_id' => 'cnt_contact_types_id',
             'cnt_contacts_id' => 'cnt_contacts_id',
-            'geo_country_id' => 'geo_country_id',
+            'geo_countries_id' => 'geo_countries_id',
             'phone' => 'phone',
+            'primary' => 'primary',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',
@@ -219,5 +181,21 @@ class CntPhones extends \Phalcon\Mvc\Model
             'deleted' => 'deleted'
         ];
     }
+    
+    public function findRelated($row)
+    {
+        if($row->unit_organizations_id)
+            $row->unit_organizations_id = UnitOrganizations::findFirst($row->unit_organizations_id);
 
+        if($row->cnt_contacts_id)
+            $row->cnt_contacts_id = CntContacts::findFirst($row->cnt_contacts_id);
+        
+        if($row->cnt_contact_types_id)
+            $row->cnt_contact_types_id = CntContactTypes::findFirst($row->cnt_contact_types_id);
+
+        if($row->geo_countries_id)
+            $row->geo_countries_id = CntContactTypes::findFirst($row->geo_countries_id);
+
+        return $row;
+    }    
 }

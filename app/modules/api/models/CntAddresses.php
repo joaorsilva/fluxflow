@@ -21,8 +21,9 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class CntAddresses extends \Phalcon\Mvc\Model
+class CntAddresses extends BaseModel
 {
     /**
      *
@@ -126,6 +127,13 @@ class CntAddresses extends \Phalcon\Mvc\Model
      * @var integer
      * @Column(type="integer", length=1, nullable=false)
      */
+    public $primary;
+
+    /**
+     *
+     * @var integer
+     * @Column(type="integer", length=1, nullable=false)
+     */
     public $active;
 
     /**
@@ -183,6 +191,7 @@ class CntAddresses extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSchema("fluxflow");
+        
         $this->belongsTo('geo_cities_id', '\GeoCities', 'id', ['alias' => 'GeoCities']);
         $this->belongsTo('cnt_contact_types_id', '\CntContactTypes', 'id', ['alias' => 'CntContactTypes']);
         $this->belongsTo('cnt_contacts_id', '\CntContacts', 'id', ['alias' => 'CntContacts']);
@@ -191,59 +200,11 @@ class CntAddresses extends \Phalcon\Mvc\Model
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
     }
 
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
     public function getSource()
     {
         return 'cnt_addresses';
     }
-
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntAddresses[]|CntAddresses     */
-    public static function find($parameters = null)
-    {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntAddresses     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
-
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
-        
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
-        
-        $total_rows = parent::count( $countParams );
-        
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
-    }
-
+    
     /**
      * Independent Column Mapping.
      * Keys are the real names in the table and the values their names in the application
@@ -265,6 +226,7 @@ class CntAddresses extends \Phalcon\Mvc\Model
             'street_address' => 'street_address',
             'door_number' => 'door_number',
             'room' => 'room',
+            'primary' => 'primary',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',
@@ -275,5 +237,27 @@ class CntAddresses extends \Phalcon\Mvc\Model
             'deleted' => 'deleted'
         ];
     }
+    
+    public function findRelated($row)
+    {
+        if($row->unit_organizations_id)
+            $row->unit_organizations_id = UnitOrganizations::findFirst($row->unit_organizations_id);
 
+        if($row->cnt_contacts_id)
+            $row->cnt_contacts_id = CntContacts::findFirst($row->cnt_contacts_id);
+        
+        if($row->cnt_contact_types_id)
+            $row->cnt_contact_types_id = CntContactTypes::findFirst($row->cnt_contact_types_id);
+
+        if($row->geo_countries_id)
+            $row->geo_countries_id = GeoCountries::findFirst($row->geo_countries_id);
+
+        if($row->geo_provinces_id)
+            $row->geo_provinces_id = GeoProvinces::findFirst($row->geo_provinces_id);
+        
+        if($row->geo_cities_id)
+            $row->geo_cities_id = GeoCities::findFirst($row->geo_cities_id);
+        
+        return $row;
+    }    
 }

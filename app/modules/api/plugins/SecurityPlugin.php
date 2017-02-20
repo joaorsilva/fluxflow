@@ -49,11 +49,11 @@ class SecurityPlugin extends Plugin
                         $resourceName = $module . "/" . $controller;
                         
                         $resource = new Resource($resourceName);
-                        
-                        foreach($organizations as $org)
+                        $acl->addResource($resource, $action);
+                        /*foreach($organizations as $org)
                         {
                             $acl->addResource($resource, $action);
-                        }
+                        }*/
 
                         foreach($roles as $role)
                         {
@@ -94,6 +94,7 @@ class SecurityPlugin extends Plugin
         $resourceName = $module . "/" . $controller;
 
         $acl = $this->getAcl();
+        
         
         $isResource = $acl->isResource($resourceName);
         if (!$isResource) {
@@ -290,5 +291,5 @@ class SecurityPlugin extends Plugin
         $query = $this->db->query($sql);
         $query->setFetchMode(\Phalcon\Db::FETCH_ASSOC);
         return $query->fetchAll();        
-    }
+    }    
 }

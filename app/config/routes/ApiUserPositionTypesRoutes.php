@@ -24,7 +24,7 @@ $router = $di->getRouter();
 $cdata = [
     'namespace'=>   "Fluxflow\Modules\Api\Controllers",
     'module'=>      "api",
-    'controller'=>  "unitorganizations"
+    'controller'=>  "userpositiontypes"
 ];
 
 $route = '/' . $cdata['module'] . '/' . $cdata['controller'];
@@ -97,6 +97,4 @@ $router->addOptions(
         'params'=>1
     ]
  );
-
-
 

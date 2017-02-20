@@ -13,7 +13,80 @@ class Elements extends Component
     
     public function getMenu()
     {
-        
+        $auth = $this->session->get('auth');
+        $this->user = $auth['user'];
+
+        $html = "<div id=\"sidebar-menu\" class=\"main_menu_side hidden-print main_menu\">" . 
+                    "<div class=\"menu_section\">" .
+                        "<h3>General</h3>" . 
+                        "<ul class=\"nav side-menu\">" . 
+                            "<li><a><i class=\"fa fa-home\"></i> Home <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/index/index\">Dashboard</a></li>" . 
+                                    "<li><a href=\"/ff/index/flows\">Business Flows</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-envelope\"></i> Messages <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/fluxmessages\">Inbox</a></li>" . 
+                                    "<li><a href=\"/ff/cntcontacts\">Contacts</a></li>" . 
+                                    "<li><a href=\"/ff/cntcontacttypes\">Contact Types</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-map-o\"></i> Flows <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/fluxboards\">Borads</a></li>" . 
+                                    "<li><a href=\"/ff/fluxeventtypes\">Event Types</a></li>" . 
+                                    "<li><a href=\"/ff/fluxevents\">Events</a></li>" . 
+                                    "<li><a href=\"/ff/fluxfieldtypes\">Field Types</a></li>" . 
+                                    "<li><a href=\"/ff/fluxflows\">Flows</a></li>" . 
+                                    "<li><a href=\"/ff/fluxflexes\">Fluxes</a></li>" . 
+                                    "<li><a href=\"/ff/fluxorigins\">Origins</a></li>" . 
+                                    "<li><a href=\"/ff/fluxpriorities\">Priorities</a></li>" . 
+                                    "<li><a href=\"/ff/fluxstatus\">Status</a></li>" . 
+                                    "<li><a href=\"/ff/fluxsteps\">Step Field Values</a></li>" . 
+                                    "<li><a href=\"/ff/fluxsubjects\">Subjects</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-globe\"></i> Locations <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/geocountries\">Contries</a></li>" . 
+                                    "<li><a href=\"/ff/geoprovinces\">State/Provinces</a></li>" . 
+                                    "<li><a href=\"/ff/geocities\">Cities</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-sitemap\"></i> Structure <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/unitorganizatons\">Organizations</a></li>" . 
+                                    "<li><a href=\"/ff/unitorganizationtypes\">Types</a></li>" . 
+                                    "<li><a href=\"/ff/unitorganizationhierarchies\">Hierarchy</a></li>" . 
+                                    "<li><a href=\"/ff/userpositiontypes\">Positions</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-users\"></i> Users <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/userusers\">Users</a></li>" . 
+                                    "<li><a href=\"/ff/userroles\">User Roles</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                            "<li><a><i class=\"fa fa-cubes\"></i> Application <span class=\"fa fa-chevron-down\"></span></a>" . 
+                                "<ul class=\"nav child_menu\">" . 
+                                    "<li><a href=\"/ff/appactions\">Actions</a></li>" . 
+                                    "<li><a href=\"/ff/appcontrollers\">Controllers</a></li>" . 
+                                    "<li><a href=\"/ff/appmodules\">Modules</a></li>" . 
+                                "</ul>" . 
+                            "</li>" . 
+                        "</ul>" . 
+                    "</div>" . 
+                    "<div class=\"menu_section\">" . 
+                        "<h3>You</h3>" . 
+                        "<ul class=\"nav side-menu\">" . 
+                            "<li><a href=\"/ff/userusers/view/2\"><i class=\"fa fa-user\"></i> Profile</a></li>" . 
+                            "<li><a href=\"/ff/userpreferences\"><i class=\"fa fa-cogs\"></i> Preferences</a></li>" . 
+                        "</ul>" . 
+                    "</div>" . 
+                "</div>";
+        return $html;
     }
     
     public function getTopNavigation()
@@ -21,7 +94,7 @@ class Elements extends Component
         $auth = $this->session->get('auth');
         $this->user = $auth['user'];
 
-        $userPictureFile = "/img/users/user_photo_" . $this->user['id'] . ".png";
+        $userPictureFile = "/img/users/" . $this->user['photo'];
         if(!file_exists(APP_PATH . "/../public" . $userPictureFile))
         {
             $userPictureFile = "/img/users/user_photo_null.png"; 
@@ -130,7 +203,7 @@ class Elements extends Component
         $auth = $this->session->get('auth');
         $this->user = $auth['user'];
 
-        $userPictureFile = "/img/users/user_photo_" . $this->user['id'] . ".png";
+        $userPictureFile = "/img/users/" . $this->user['photo'];
         if(!file_exists(APP_PATH . "/../public" . $userPictureFile))
         {
             $userPictureFile = "/img/users/user_photo_null.png"; 

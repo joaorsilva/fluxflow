@@ -31,13 +31,14 @@ class CntaddressesController extends ControllerBase
         '_url',
         'pagging',
         'filter',
-        'order'
+        'order',
+        'r'
     );
     
     /*
      * Id of the user performing the operation
      */
-    private $userId = 1;
+    private $user;
     
     /**
      * Initialize the controller once
@@ -54,7 +55,8 @@ class CntaddressesController extends ControllerBase
     {
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
-            $this->userId = $auth['user']->id;
+            $this->user = $auth['user'];
+        CntAddresses::setUser($this->user);
     }
 
     /**
@@ -67,34 +69,45 @@ class CntaddressesController extends ControllerBase
         $requestSetting = array();
         $data = array();
         
-        if( !$this->validateParams( $this->request->getQuery(), $this->validParams ) )
+        $params = $this->request->getQuery();
+        if( !$this->validateParams($params, $this->validParams ) )
+        {
              $code = 400;
-        
-        if($id)
-        {
-            //Single record
-            $record = CntAddresses::findFirst($id);
-            if( !$record) 
-                $code = 404;
-            else
-            {
-                $code = 200;
-                $data = ["data" => $record->toArray()];
-            }
         }
-        else 
+        else
         {
-            //Recordset to find
-            $requestSetting = $this->parseSettings( $this->request, CntAddresses );
-            
-            $struct = CntAddresses::findStructured($requestSetting);
-
-            if( count($struct['result']) == 0)
-                $code = 404;
-            else
+            $relations = FALSE;
+            if(isset($params['r']))
             {
-                $code = 200;
-                $data = ["data" => $struct];    
+                $relations = TRUE;
+            }
+
+            if($id)
+            {
+                //Single record
+                $record = CntAddresses::findFirst($id, $relations);
+                if( !$record) 
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $record->toArray()];
+                }
+            }
+            else 
+            {
+                //Recordset to find
+                $requestSetting = $this->parseSettings( $this->request, CntAddresses );
+
+                $struct = CntAddresses::findStructured($requestSetting, $relations);
+
+                if( count($struct['result']) == 0)
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $struct];    
+                }
             }
         }
         
@@ -117,9 +130,6 @@ class CntaddressesController extends ControllerBase
             || !isset($post['unit_organizations_id'])
             || !isset($post['cnt_contacts_id'])
             || !isset($post['cnt_contact_types_id'])
-            || !isset($post['geo_countries_id'])
-            || !isset($post['geo_cities_id'])
-            || !isset($post['street_address'])
         ) 
             $code = 400;
         
@@ -128,70 +138,50 @@ class CntaddressesController extends ControllerBase
         $resource->unit_organizations_id = $post['unit_organizations_id'];
         $resource->cnt_contacts_id = $post['cnt_contacts_id'];
         $resource->cnt_contact_types_id = $post['cnt_contact_types_id'];
-        $resource->geo_countries_id = $post['geo_countries_id'];
-        if(array_key_exists('geo_provinces_id',$post))
-        {
-            if($post['geo_provinces_id'] === "NULL")
-            {
-                $resource->geo_provinces_id = NULL;
-            }
-            else 
-            {
-                $resource->geo_provinces_id = $post['geo_provinces_id'];
-            }
-        }
-        $resource->geo_cities_id = $post['geo_cities_id'];
-        if(array_key_exists('neigborhood',$post))
-        {
-            if($post['neigborhood'] === "NULL")
-            {
-                $resource->neigborhood = NULL;
-            }
-            else 
-            {
-                $resource->neigborhood = $post['neigborhood'];
-            }
-        }
-        if(array_key_exists('zip_code',$post))
-        {
-            if($post['zip_code'] === "NULL")
-            {
-                $resource->zip_code = NULL;
-            }
-            else 
-            {
-                $resource->zip_code = $post['zip_code'];
-            }
-        }
-        $resource->street_address = $post['street_address'];
-        if(array_key_exists('door_number',$post))
-        {
-            if($post['door_number'] === "NULL")
-            {
-                $resource->door_number = NULL;
-            }
-            else 
-            {
-                $resource->door_number = $post['door_number'];
-            }
-        }
-        if(array_key_exists('room',$post))
-        {
-            if($post['room'] === "NULL")
-            {
-                $resource->room = NULL;
-            }
-            else 
-            {
-                $resource->room = $post['room'];
-            }
-        }
-        $resource->active = 1;
         
+        if(!isset($post['geo_countries_id']))
+            $resource->geo_countries_id = NULL;
+        else
+            $resource->geo_countries_id = $post['geo_countries_id'];
+
+        if(!isset($post['geo_provinces_id']))
+            $resource->geo_provinces_id = NULL;
+        else
+            $resource->geo_provinces_id = $post['geo_provinces_id'];
+            
+        if(!isset($post['geo_cities_id']))
+            $resource->geo_cities_id = NULL;
+        else
+            $resource->geo_cities_id = $post['geo_cities_id'];
+
+        if(!isset($post['zip_code']))
+            $resource->zip_code = NULL;
+        else
+            $resource->zip_code = $post['zip_code'];
+        
+        if(!isset($post['street_address']))
+            $resource->street_address = NULL;
+        else
+            $resource->street_address = $post['street_address'];
+        
+        if(!isset($post['door_number']))
+            $resource->door_number = NULL;
+        else
+            $resource->door_number = $post['door_number'];
+
+        if(!isset($post['room']))
+            $resource->room = NULL;
+        else
+            $resource->room = $post['room'];
+
+        if(!isset($post['primary']))
+            $resource->primary = NULL;
+        else
+            $resource->primary = $post['primary'];
+
+        $resource->active = 1;        
         if( isset($post['active']) )
-        {
             $resource->active = $post['active'];
-        }
         
         if( $resource->create() === FALSE)
         {
@@ -225,9 +215,6 @@ class CntaddressesController extends ControllerBase
             || !isset($post['unit_organizations_id'])
             || !isset($post['cnt_contacts_id'])
             || !isset($post['cnt_contact_types_id'])
-            || !isset($post['geo_countries_id'])
-            || !isset($post['geo_cities_id'])
-            || !isset($post['street_address'])
         )
             $code = 400;
         
@@ -240,69 +227,34 @@ class CntaddressesController extends ControllerBase
             $resource->unit_organizations_id = $post['unit_organizations_id'];
             $resource->cnt_contacts_id = $post['cnt_contacts_id'];
             $resource->cnt_contact_types_id = $post['cnt_contact_types_id'];
-            $resource->geo_countries_id = $post['geo_countries_id'];
-            if(array_key_exists('geo_provinces_id',$post))
-            {
-                if($post['geo_provinces_id'] === "NULL")
-                {
-                    $resource->geo_provinces_id = NULL;
-                }
-                else 
-                {
-                    $resource->geo_provinces_id = $post['geo_provinces_id'];
-                }
-            }
-            $resource->geo_cities_id = $post['geo_cities_id'];
-            if(array_key_exists('neigborhood',$post))
-            {
-                if($post['neigborhood'] === "NULL")
-                {
-                    $resource->neigborhood = NULL;
-                }
-                else 
-                {
-                    $resource->neigborhood = $post['neigborhood'];
-                }
-            }
-            if(array_key_exists('zip_code',$post))
-            {
-                if($post['zip_code'] === "NULL")
-                {
-                    $resource->zip_code = NULL;
-                }
-                else 
-                {
-                    $resource->zip_code = $post['zip_code'];
-                }
-            }
-            $resource->street_address = $post['street_address'];
-            if(array_key_exists('door_number',$post))
-            {
-                if($post['door_number'] === "NULL")
-                {
-                    $resource->door_number = NULL;
-                }
-                else 
-                {
-                    $resource->door_number = $post['door_number'];
-                }
-            }
-            if(array_key_exists('room',$post))
-            {
-                if($post['room'] === "NULL")
-                {
-                    $resource->room = NULL;
-                }
-                else 
-                {
-                    $resource->room = $post['room'];
-                }
-            }
-            if( isset($post['active']) )
-            {
-                $resource->active = $post['active'];
-            }
+
+            if(isset($post['geo_countries_id']))
+                $resource->geo_countries_id = $post['geo_countries_id'];
             
+            if(isset($post['geo_provinces_id']))
+                $resource->geo_provinces_id = $post['geo_provinces_id'];
+
+            if(isset($post['geo_cities_id']))
+                $resource->geo_cities_id = $post['geo_cities_id'];
+
+            if(isset($post['street_address']))
+                $resource->street_address = $post['street_address'];
+
+            if(isset($post['zip_code']))
+                $resource->zip_code = $post['zip_code'];
+
+            if(isset($post['door_number']))
+                $resource->door_number = $post['door_number'];
+
+            if(isset($post['room']))
+                $resource->room = $post['room'];
+
+            if(isset($post['primary']))
+                $resource->primary = $post['primary'];
+
+            if(isset($post['active']))
+                $resource->active = $post['active'];
+
             if( $resource->update() === FALSE )
             {
                 $code = 400;

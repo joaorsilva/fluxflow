@@ -17,12 +17,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
- 
 namespace Fluxflow\Modules\Api\Models;
 
-use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\UnitOrganizations;
+use Fluxflow\Modules\Api\Models\UserPositionTypes;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class UserUsers extends \Phalcon\Mvc\Model
+class UserUsers extends BaseModel
 {
     /**
      *
@@ -32,7 +33,6 @@ class UserUsers extends \Phalcon\Mvc\Model
      * @Column(type="integer", length=10, nullable=false)
      */
     public $id;
-
     
     /**
      *
@@ -41,6 +41,12 @@ class UserUsers extends \Phalcon\Mvc\Model
      */
     public $unit_organizations_id;
     
+    /**
+     *
+     * @var integer 
+     * @Column(type="integer", length=10, nullable=true)
+     */
+    public $user_position_types_id;
     
     /**
      *
@@ -89,6 +95,13 @@ class UserUsers extends \Phalcon\Mvc\Model
      */
     public $last_operation;
     
+    /**
+     *
+     * @var string 
+     * @Column(type="string", length=255, nullable=false)
+     */
+    public $photo;
+
     /**
      *
      * @var integer
@@ -151,40 +164,17 @@ class UserUsers extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSchema("fluxflow");
+        
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
         $this->hasMany('id', 'FluxFluxes', 'owner_id', ['alias' => 'FluxFluxes']);
         $this->hasMany('id', 'UserAssignedOrganizations', 'user_users_id', ['alias' => 'UserAssignedOrganizations']);
         $this->hasMany('id', 'UserAssingnedRoles', 'user_users_id', ['alias' => 'UserAssingnedRoles']);
+        
     }
-
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
+    
     public function getSource()
     {
         return 'user_users';
-    }
-
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return UserUsers[]|UserUsers     */
-    public static function find($parameters = null)
-    {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return UserUsers     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
     }
 
     public static function findLogin($email,$password)
@@ -197,30 +187,7 @@ class UserUsers extends \Phalcon\Mvc\Model
                     ]
                 ]);
     }
-    
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
         
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
-        
-        $total_rows = parent::count( $countParams );
-        
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
-    }
-
     /**
      * Independent Column Mapping.
      * Keys are the real names in the table and the values their names in the application
@@ -232,12 +199,14 @@ class UserUsers extends \Phalcon\Mvc\Model
         return [
             'id' => 'id',
             'unit_organizations_id' => 'unit_organizations_id',
+            'user_position_types_id' => 'user_position_types_id',
             'first_name' => 'first_name',
             'surename' => 'surename',
             'email' => 'email',
             'password' => 'password',
             'last_login' => 'last_login',
             'last_operation' => 'last_operation',
+            'photo' => 'photo',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',
@@ -248,5 +217,19 @@ class UserUsers extends \Phalcon\Mvc\Model
             'deleted' => 'deleted'
         ];
     }
+    
+    public function findRelated($row)
+    {
+        if($row->unit_organizations_id) 
+        {
+            $row->unit_organizations_id = UnitOrganizations::findFirst($row->unit_organizations_id);
+        }
 
+        if($row->user_position_types_id)
+        {
+            $row->user_position_types_id = UserPositionTypes::findFirst($row->user_position_types_id);
+        }
+        
+        return $row;
+    }    
 }

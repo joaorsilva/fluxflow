@@ -40,7 +40,7 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>User Report <small>Activity report</small></h2>
-                    <ul class="nav navbar-right panel_toolbox">
+                    <!--<ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
                       <li class="dropdown">
@@ -54,7 +54,7 @@
                       </li>
                       <li><a class="close-link"><i class="fa fa-close"></i></a>
                       </li>
-                    </ul>
+                    </ul>-->
                     <div class="clearfix"></div>
                   </div>
                   <div class="x_content">
@@ -62,22 +62,23 @@
                       <div class="profile_img">
                         <div id="crop-avatar">
                           <!-- Current avatar -->
-                          <img class="img-responsive avatar-view" src="/images/picture.jpg" alt="Avatar" title="Change the avatar">
+                          <img id="user-photo" class="img-responsive avatar-view" src="/img/users/user_photo_null.png" alt="Avatar" title="Change the avatar">
                         </div>
                       </div>
-                      <h3>Samuel Doe</h3>
+                      <h3 id="user-name"></h3>
 
                       <ul class="list-unstyled user_data">
-                        <li><i class="fa fa-map-marker user-profile-icon"></i> San Francisco, California, USA
+                        <li><i style="width:14px;:height:14px;" id="user-company" class="fa fa-bank user-profile-icon"></i><span> Company</span>
                         </li>
-
-                        <li>
-                          <i class="fa fa-briefcase user-profile-icon"></i> Software Engineer
+                        <li><i style="width:14px;:height:14px;" class="fa fa-map-marker user-profile-icon"></i> <span id="user-address"></span>
                         </li>
-
+                        <li><div id="user-address-info" style="margin-left:20px"></div>
+                        </li>
+                        <li><i style="width:14px;:height:14px;" class="fa fa-briefcase user-profile-icon"></i> <span id="user-position">
+                        </li>
                         <li class="m-top-xs">
-                          <i class="fa fa-external-link user-profile-icon"></i>
-                          <a href="http://www.kimlabs.com/profile/" target="_blank">www.kimlabs.com</a>
+                          <i style="width:14px;:height:14px;" class="fa fa-envelope user-profile-icon"></i>
+                          <a id="user-email" href="" target="_blank"></a>
                         </li>
                       </ul>
 
@@ -121,12 +122,12 @@
                         <div class="col-md-6">
                           <h2>User Activity Report</h2>
                         </div>
-                        <div class="col-md-6">
+                        <!--<div class="col-md-6">
                           <div id="reportrange" class="pull-right" style="margin-top: 5px; background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #E6E9ED">
                             <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                             <span>December 30, 2014 - January 28, 2015</span> <b class="caret"></b>
                           </div>
-                        </div>
+                        </div>-->
                       </div>
                       <!-- start of user-activity-graph -->
                       <div id="graph_bar" style="width:100%; height:280px;"></div>

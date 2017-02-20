@@ -31,13 +31,14 @@ class UserusersController extends ControllerBase
         '_url',
         'pagging',
         'filter',
-        'order'
+        'order',
+        'r'
     );
     
     /*
      * Id of the user performing the operation
      */
-    private $userId = 1;
+    private $user = 1;
     
     /**
      * Initialize the controller once
@@ -54,7 +55,8 @@ class UserusersController extends ControllerBase
     {
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
-            $this->userId = $auth['user']->id;
+            $this->user = $auth['user'];
+        UserUsers::setUser($this->user);
     }
 
     /**
@@ -67,37 +69,52 @@ class UserusersController extends ControllerBase
         $requestSetting = array();
         $data = array();
         
-        if( !$this->validateParams( $this->request->getQuery(), $this->validParams ) )
-             $code = 400;
-        
-        if($id)
+        $params = $this->request->getQuery();
+        if( !$this->validateParams($params , $this->validParams ) )
         {
-            //Single record
-            $record = UserUsers::findFirst($id);
-            if( !$record) 
-                $code = 404;
-            else
-            {
-                $code = 200;
-                $data = ["data" => $record->toArray()];
-            }
-        }
+             $code = 400;
+        } 
         else 
         {
-            //Recordset to find
-            $requestSetting = $this->parseSettings( $this->request, UserUsers );
-            
-            $struct = UserUsers::findStructured($requestSetting);
-
-            if( count($struct['result']) == 0)
-                $code = 404;
-            else
+            $relations = FALSE;
+            if(isset($params['r']))
             {
-                $code = 200;
-                $data = ["data" => $struct];    
+                $relations = TRUE;
+            }
+
+            if($id)
+            {
+                //Single record
+                $record = UserUsers::findFirst($id,$relations);
+                if( !$record) 
+                {
+                    $code = 404;
+                }
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $record->toArray()];
+                }
+            }
+            else 
+            {
+                //Recordset to find
+                $requestSetting = $this->parseSettings( $this->request, UserUsers );
+
+                $struct = UserUsers::findStructured($requestSetting, $relations);
+
+                if( count($struct['result']) == 0)
+                {
+                    $code = 404;
+                }
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $struct];    
+                }
             }
         }
-        
+
         return $this->sendResponse($code,$data);        
     }
     
@@ -108,59 +125,54 @@ class UserusersController extends ControllerBase
      */
     public function newAction()
     {
-        
         $data = array();
         
         $post = $this->request->getJsonRawBody(TRUE);
         if( 
             !$post
+            || !isset($post['unit_organizations_id'])
+            || !isset($post['user_position_types_id'])
             || !isset($post['first_name'])
             || !isset($post['surename'])
             || !isset($post['email'])
             || !isset($post['password'])
-            || !isset($post['last_login'])
-            || !isset($post['last_operation'])
-        ) 
-            $code = 400;
-        
-        $resource = new UserUsers();
-        $resource->setUserId($this->userId);
-        if(array_key_exists('unit_organizations_id',$post))
+        )
         {
-            if($post['unit_organizations_id'] === "NULL")
+            $code = 400;
+            $data = ['status' => 'BAD-REQUEST'];
+        } else {
+            
+            $resource = new UserUsers();
+            $resource->unit_organizations_id = $post['unit_organizations_id'];
+            $resource->user_position_types_id = $post['user_position_types_id'];
+            $resource->first_name = $post['first_name'];
+            $resource->surename = $post['surename'];
+            $resource->email = $post['email'];
+            $resource->password = $post['password'];
+            if(isset($post['photo']) && $post['photo'])
             {
-                $resource->unit_organizations_id = NULL;
+                $resource->photo = $post['photo'];
+            }
+            $resource->active = 1;
+            
+            if( isset($post['active']) )
+            {
+                $resource->active = $post['active'];
+            }
+
+            if( $resource->create() === FALSE)
+            {
+                $code = 400;
+                $data = ['messages'  => $resource->getMessages()];
             }
             else 
             {
-                $resource->unit_organizations_id = $post['unit_organizations_id'];
-            }
-        }
-        $resource->first_name = $post['first_name'];
-        $resource->surename = $post['surename'];
-        $resource->email = $post['email'];
-        $resource->password = $post['password'];
-        $resource->last_login = $post['last_login'];
-        $resource->last_operation = $post['last_operation'];
-        $resource->active = 1;
-        
-        if( isset($post['active']) )
-        {
-            $resource->active = $post['active'];
-        }
-        
-        if( $resource->create() === FALSE)
-        {
-            $code = 400;
-            $data = ['messages'  => $resource->getMessages()];
-        }
-        else 
-        {
-            if( !$resource->id ) $code = 500;
-            else 
-            {
-                $code = 201;
-                $data = ['data' => $resource->toArray()];
+                if( !$resource->id ) $code = 500;
+                else 
+                {
+                    $code = 201;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
         
@@ -178,55 +190,53 @@ class UserusersController extends ControllerBase
         $post = $this->request->getJsonRawBody(TRUE);
         if( 
             !$post 
+            || !isset($post['unit_organizations_id'])
+            || !isset($post['user_position_types_id'])
             || !isset($post['first_name'])
             || !isset($post['surename'])
             || !isset($post['email'])
             || !isset($post['password'])
-            || !isset($post['last_login'])
-            || !isset($post['last_operation'])
-        )
+        ) {
             $code = 400;
-        
-        $resource = UserUsers::findFirst($id);
-        if( !$record )
-            $code = 404;
-        else 
-        {
-            $record->setUserId($this->userId);
-            if(array_key_exists('unit_organizations_id',$post))
+            $data = ['status' => 'BAD-REQUEST'];
+        } else {
+            $resource = UserUsers::findFirst($id);
+            if( !$record )
             {
-                if($post['unit_organizations_id'] === "NULL")
-                {
-                    $resource->unit_organizations_id = NULL;
-                }
-                else 
-                {
-                    $resource->unit_organizations_id = $post['unit_organizations_id'];
-                }
+                $code = 404;
+                $data = ['status' => 'NOT-FOUND'];
             }
-            $resource->first_name = $post['first_name'];
-            $resource->surename = $post['surename'];
-            $resource->email = $post['email'];
-            $resource->password = $post['password'];
-            $resource->last_login = $post['last_login'];
-            $resource->last_operation = $post['last_operation'];
-            if( isset($post['active']) )
-            {
-                $resource->active = $post['active'];
-            }
-            
-            if( $resource->update() === FALSE )
-            {
-                $code = 400;
-                $data = ['messages' => $resource->getMessages()];         
-            } 
             else 
             {
-                $code = 200;
-                $data = ['data' => $resource->toArray()];
+                $record->setUser($this->user);
+                $resource->unit_organizations_id = $post['unit_organizations_id'];
+                $resource->user_position_types_id = $post['user_position_types_id'];
+                $resource->first_name = $post['first_name'];
+                $resource->surename = $post['surename'];
+                $resource->email = $post['email'];
+                $resource->password = $post['password'];
+                
+                if(isset($post['photo']) && $post['photo'])
+                {
+                    $resource->photo = $post['photo'];
+                }
+                if( isset($post['active']) )
+                {
+                    $resource->active = $post['active'];
+                }
+
+                if( $resource->update() === FALSE )
+                {
+                    $code = 400;
+                    $data = ['messages' => $resource->getMessages()];         
+                } 
+                else 
+                {
+                    $code = 200;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
-        
         return $this->sendResponse($code,$data);         
     }
 
@@ -248,7 +258,7 @@ class UserusersController extends ControllerBase
                 $code = 404;
             else 
             {
-                $record->setUserId($this->userId);
+                $record->setUser($this->user);
                 $record->deleted = 1;
                 if ( $record->save() == FALSE )
                     $code = 500;

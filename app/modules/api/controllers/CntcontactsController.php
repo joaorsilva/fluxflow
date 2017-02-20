@@ -31,13 +31,14 @@ class CntcontactsController extends ControllerBase
         '_url',
         'pagging',
         'filter',
-        'order'
+        'order',
+        'r'
     );
     
     /*
      * Id of the user performing the operation
      */
-    private $userId = 1;
+    private $user;
     
     /**
      * Initialize the controller once
@@ -54,7 +55,8 @@ class CntcontactsController extends ControllerBase
     {
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
-            $this->userId = $auth['user']->id;
+            $this->user = $auth['user'];
+        CntContacts::setUser($this->user);
     }
 
     /**
@@ -67,37 +69,51 @@ class CntcontactsController extends ControllerBase
         $requestSetting = array();
         $data = array();
         
-        if( !$this->validateParams( $this->request->getQuery(), $this->validParams ) )
+        $params = $this->request->getQuery();
+        if( !$this->validateParams( $params, $this->validParams ) )
+        {
              $code = 400;
-        
-        if($id)
-        {
-            //Single record
-            $record = CntContacts::findFirst($id);
-            if( !$record) 
-                $code = 404;
-            else
-            {
-                $code = 200;
-                $data = ["data" => $record->toArray()];
-            }
         }
-        else 
+        else
         {
-            //Recordset to find
-            $requestSetting = $this->parseSettings( $this->request, CntContacts );
-            
-            $struct = CntContacts::findStructured($requestSetting);
+            $relations = FALSE;
+            if(isset($params['r']))
+            {
+                $relations = TRUE;
+            }
 
-            if( count($struct['result']) == 0)
-                $code = 404;
-            else
+            if($id)
             {
-                $code = 200;
-                $data = ["data" => $struct];    
+                //Single record
+                $record = CntContacts::findFirst($id, $relations);
+                if( !$record)
+                {
+                    $code = 404;
+                }    
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $record->toArray()];
+                }
+            }
+            else 
+            {
+                //Recordset to find
+                $requestSetting = $this->parseSettings( $this->request, CntContacts );
+
+                $struct = CntContacts::findStructured($requestSetting, $relations);
+
+                if( count($struct['result']) == 0)
+                {
+                    $code = 404;
+                }
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $struct];    
+                }
             }
         }
-        
         return $this->sendResponse($code,$data);        
     }
     
@@ -123,17 +139,17 @@ class CntcontactsController extends ControllerBase
         $resource = new CntContacts();
         $resource->setUserId($this->userId);
         $resource->unit_organizations_id = $post['unit_organizations_id'];
-        if(array_key_exists('company_name',$post))
-        {
-            if($post['company_name'] === "NULL")
-            {
-                $resource->company_name = NULL;
-            }
-            else 
-            {
-                $resource->company_name = $post['company_name'];
-            }
-        }
+        
+        if(!isset($post['company_name']))
+            $resource->company_name = NULL;
+        else
+            $resource->company_name = $post['company_name'];
+        
+        if(!isset($post['user_users_id']))
+            $resource->user_users_id = NULL;
+        else
+            $resource->user_users_id = $post['user_users_id'];
+            
         $resource->name = $post['name'];
         $resource->surename = $post['surename'];
         $resource->active = 1;
@@ -185,17 +201,12 @@ class CntcontactsController extends ControllerBase
         {
             $record->setUserId($this->userId);
             $resource->unit_organizations_id = $post['unit_organizations_id'];
-            if(array_key_exists('company_name',$post))
-            {
-                if($post['company_name'] === "NULL")
-                {
-                    $resource->company_name = NULL;
-                }
-                else 
-                {
-                    $resource->company_name = $post['company_name'];
-                }
-            }
+            if(isset($post['company_name']))
+                $resource->company_name = $post['company_name'];
+
+            if(isset($post['user_users_id']))
+                $resource->user_users_id = $post['user_users_id'];
+
             $resource->name = $post['name'];
             $resource->surename = $post['surename'];
             if( isset($post['active']) )

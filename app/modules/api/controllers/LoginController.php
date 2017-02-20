@@ -6,6 +6,7 @@ use Fluxflow\Modules\Api\Models\UserUsers;
 use Fluxflow\Modules\Api\Models\UserAssignedOrganizations;
 use Fluxflow\Modules\Api\Models\UserAssingnedRoles;
 use Fluxflow\Modules\Api\Models\UserRoles;
+use Fluxflow\Modules\Api\Models\UnitOrganizationHierarchy;
 
 class LoginController extends ControllerBase {
     
@@ -65,7 +66,7 @@ class LoginController extends ControllerBase {
                     {
                         $r = UserRoles::findFirst($role->user_roles_id);
                         $roles[$org->unit_organizations_id][] = strtolower($r->name);
-                        $organizationList[$org->unit_organizations_id] = array();
+                        $organizationList[$org->unit_organizations_id] = UnitOrganizationHierarchy::findHierarchy($org->unit_organizations_id);
                     }
                 }
             }
@@ -89,15 +90,18 @@ class LoginController extends ControllerBase {
                     'user'  => null,
                     'token' => md5($user->email . uniqid(gethostname(), TRUE))
                 );
+                
                 $auth['user'] = $user->toArray();
                 $auth['user']['password'] = "secret";
                 $auth['user']['organizations'] = $roles;
                 $auth['user']['currentorganization'] = $auth['user']['unit_organizations_id'];
                 $auth['user']['organizationlist'] = $organizationList;
+                $auth['user']['permissions'] = $this->findPermissions($auth['user']['id']);
                 //print_r($auth);die;
                 $date = (new \DateTime())->format("Y-m-d H:i:s");
                 $user->last_login = $date;
                 $user->last_operation = $date;
+                $user->setUser($auth['user']);
                 
                 if( $user->update() == FALSE)
                 {
@@ -150,6 +154,48 @@ class LoginController extends ControllerBase {
         $response->setJsonContent($data);
         
         return $response;        
+    }
+    
+    protected function findPermissions($userId)
+    {
+        $sql = "SELECT
+            urp.unit_organizations_id,
+            am.name as module, 
+            ac.name as controller, 
+            aa.name as action
+            FROM
+            user_assingned_roles uar
+            INNER JOIN user_role_permissions urp ON (urp.unit_organizations_id = uar.unit_organizations_id AND urp.user_roles_id = uar.user_roles_id)
+            INNER JOIN app_modules am ON (urp.app_modules_id = am.id)
+            INNER JOIN app_controllers ac ON (urp.app_controllers_id = ac.id)
+            INNER JOIN app_actions aa ON (urp.app_actions_id = aa.id)
+            WHERE
+            uar.user_users_id =2
+            AND uar.active > 0
+            AND uar.deleted = 0
+            AND urp.active > 0
+            AND urp.deleted = 0
+            AND am.active > 0
+            AND am.deleted = 0
+            AND ac.active > 0
+            AND ac.deleted = 0
+            AND aa.active > 0
+            AND aa.deleted = 0
+            AND am.id=3
+            AND aa.secured = 1";
+        $query = $this->db->query($sql);
+        $query->setFetchMode(\Phalcon\Db::FETCH_ASSOC);
+        $res = $query->fetchAll();        
+        
+        $permissions = [];
+        foreach($res as $row)
+        {
+            $permissions[$row['unit_organizations_id']][strtolower($row['module']) . "/" . strtolower($row['controller']) . "/" . strtolower($row['action'])] = TRUE;
+        }
+        
+        return $permissions;
+        
+        
     }
     
 }

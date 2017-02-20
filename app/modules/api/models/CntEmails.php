@@ -21,8 +21,9 @@
 namespace Fluxflow\Modules\Api\Models;
 
 use Fluxflow\Modules\Api\Library\ApiParamQuery;
+use Fluxflow\Modules\Api\Models\BaseModel;
 
-class CntEmails extends \Phalcon\Mvc\Model
+class CntEmails extends BaseModel
 {
     /**
      *
@@ -65,6 +66,13 @@ class CntEmails extends \Phalcon\Mvc\Model
      */
     public $email;
     
+    /**
+     *
+     * @var integer
+     * @Column(type="integer", length=1, nullable=false)
+     */
+    public $primary;
+
     /**
      *
      * @var integer
@@ -127,62 +135,15 @@ class CntEmails extends \Phalcon\Mvc\Model
     public function initialize()
     {
         $this->setSchema("fluxflow");
+        
         $this->belongsTo('cnt_contact_types_id', '\CntContactTypes', 'id', ['alias' => 'CntContactTypes']);
         $this->belongsTo('cnt_contacts_id', '\CntContacts', 'id', ['alias' => 'CntContacts']);
         $this->belongsTo('unit_organizations_id', '\UnitOrganizations', 'id', ['alias' => 'UnitOrganizations']);
     }
 
-    /**
-     * Returns table name mapped in the model.
-     *
-     * @return string
-     */
     public function getSource()
     {
         return 'cnt_emails';
-    }
-
-    /**
-     * Allows to query a set of records that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntEmails[]|CntEmails     */
-    public static function find($parameters = null)
-    {
-        return parent::find($parameters);
-    }
-
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return CntEmails     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
-
-    /**
-     * Finds a group of rows based on a criteria
-     * 
-     * @param array $params
-     * @return array
-     */
-    public static function findStructured( array $params )
-    {
-        $queryParams = ApiParamQuery::prepareParams( $params );
-        
-        $countParams = array(
-            'conditions'    => $queryParams['conditions'],
-            'bind'          => $queryParams['bind']
-        );
-        
-        $total_rows = parent::count( $countParams );
-        
-        $params['paging']['total_pages'] = ceil($total_rows / $params['paging']['page_size']);
-        $params['result'] = parent::find( $queryParams );
-
-        return $params;
     }
 
     /**
@@ -199,6 +160,7 @@ class CntEmails extends \Phalcon\Mvc\Model
             'cnt_contact_types_id' => 'cnt_contact_types_id',
             'cnt_contacts_id' => 'cnt_contacts_id',
             'email' => 'email',
+            'primary' => 'primary',
             'active' => 'active',
             'created_by' => 'created_by',
             'created_date' => 'created_date',
