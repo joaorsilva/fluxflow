@@ -6,11 +6,11 @@
         <div class="login_wrapper">
             <div class="animate form login_form">
                 <div class="product-name">
-                    <h1><img src="/img/logo_60x44.png" width="60" height="44" alt="Flux Flow logo"> Flux Flow</h1>
+                    <h1><img src="/img/logo_60x44.png" width="60" height="44" alt="Flux Flow logo"> Flux Flow&trade;</h1>
                 </div>
                 <section class="login_content">
                     <form id="login-form" method="post" action="/api/login">
-                        <h1>Login Form</h1>
+                        <h1>Login</h1>
                         <div class="item form-group">
                             <input type="email" id="login-email" name="email" data-validate-linked="email" data-validate-length="3,250" class="form-control" placeholder="Email" required="required" />
                         </div>
@@ -31,7 +31,7 @@
                             <div class="clearfix"></div>
                             <br />
                             <div>
-                                <p>©2017 All Rights Reserved. SPAGI Systems, Ltd.</p>
+                                <p>©2017 All Rights Reserved. FluxFlow, Ltd.</p>
                                 <p>Privacy and Terms</p>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                             <input type="password" class="form-control" placeholder="Password" required="required" />
                         </div>
                         <div>
-                            <a class="btn btn-default submit" href="index.html">Submit</a>
+                            <a class="btn btn-default submit" href="javascript:void(0)">Submit</a>
                         </div>
                         <div class="clearfix"></div>
                         <div class="separator">
@@ -62,7 +62,7 @@
                             <div class="clearfix"></div>
                             <br />
                             <div>
-                                <p>©2017 All Rights Reserved. SPAGI Systems, Ltd.</p>
+                                <p>©2017 All Rights Reserved. FluxFlow, Ltd.</p>
                                 <p>Privacy and Terms</p>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                             <input type="email" class="form-control" placeholder="Email" required="required" />
                         </div>
                         <div>
-                            <a class="btn btn-default submit" href="index.html">Submit</a>
+                            <a class="btn btn-default submit" href="javascript:void(0)">Submit</a>
                         </div>
                         <div class="clearfix"></div>
                         <div class="separator">
@@ -90,7 +90,7 @@
                             <div class="clearfix"></div>
                             <br />
                             <div>
-                                <p>©2017 All Rights Reserved. SPAGI Systems, Ltd.</p>
+                                <p>©2017 All Rights Reserved. FluxFlow, Ltd.</p>
                                 <p>Privacy and Terms</p>
                             </div>
                         </div>
