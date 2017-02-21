@@ -85,13 +85,28 @@ City, AA 99999<br><br><br>
 <span>
 <a class="text-white" taget="_new" href="http://www.twiter.com/fluxflow"><i class="fa fa-twitter"></i>&nbsp;Twitter</a></br>
 <a class="text-white" taget="_new" href="http://www.linkedin.com/fluxflow"><i class="fa fa-linkedin"></i>&nbsp;LinkedIn</a></br>
-<a class="text-white" taget="_new" href="http://www.facebook.com/fluxflow"><i class="fa fa-facebook-official"></i>&nbsp;Facebook</a></br>
+<a class="text-white" taget="_new" href="http://www.facebook.com/fluxflowsoftware"><i class="fa fa-facebook-official"></i>&nbsp;Facebook</a></br>
 <a class="text-white" taget="_new" href="http://www.youtube.com/fluxflow"><i class="fa fa-youtube"></i>&nbsp;Youtube</a></br>
 <a class="text-white" taget="_new" href="http://www.instagram.com/fluxflow"><i class="fa fa-instagram"></i>&nbsp;Instagram</a></br>
 </span>
 </p>
                     </div>
-                    <div class="col-sm-6"><p class="mbr-contacts__text"><strong>Links</strong></p><ul class="mbr-contacts__list"><li><a class="text-white" href="https://mobirise.com/">Website builder</a></li><li><a class="text-white" href="https://mobirise.com/mobirise-free-win.zip">Download for Windows</a></li><li><a class="text-white" href="https://mobirise.com/mobirise-free-mac.zip">Download for Mac</a></li></ul></div>
+                    <div class="col-sm-6">
+                        <p class="mbr-contacts__text">
+                            <strong>Links</strong>
+                        </p>
+                        <ul class="mbr-contacts__list">
+                            <li>
+                                <a class="text-white" href="https://mobirise.com/">Website builder</a>
+                            </li>
+                            <li>
+                                <a class="text-white" href="https://mobirise.com/mobirise-free-win.zip">Download for Windows</a>
+                            </li>
+                            <li>
+                                <a class="text-white" href="https://mobirise.com/mobirise-free-mac.zip">Download for Mac</a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-4" data-form-type="formoid">

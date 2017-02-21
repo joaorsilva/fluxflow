@@ -11,7 +11,18 @@ $(document).ready( function() {
             filter: null,
             order: {
                 id:"asc"
-            }
+            },
+            values: {}
+        },
+        loadValues: function()
+        {
+            $.each($(".javascript-data"), function(key,value) {
+                
+                var name = $(this).attr("data-key");
+                var val = $(this).attr("data-value");
+                functions.data.values[name] = val;
+            });
+            //console.log(functions.data.values);
         },
         insertData: function() {
             $("#table-records > tbody").html("");
@@ -44,7 +55,11 @@ $(document).ready( function() {
                     html += "   <td class=\"\">" + item.app_modules_id.name + "</td>";
                     html += "   <td class=\"a-center\">" + active + "</td>";
                     html += "   <td class=\"a-center\">" + deleted + "</td>";
-                    html += "   <td class=\"last\"> &nbsp;</td>";
+                    html += "   <td class=\"last\">";
+                    html += "       <div class=\"btn-group\">";
+                    html += "           <a class=\"btn btn-success\" href=\"\">"
+                    html += "       </div>";
+                    html += "   </td>";
                     html += "</tr>";
                     $("#table-records > tbody").append(html);
                 });
@@ -127,7 +142,7 @@ $(document).ready( function() {
         makeUrl: function() {
             functions.data.paging.pageSize = $("#page-size").val();
             var orderField = Object.keys(functions.data.order)[0];
-            var url = "/api/appcontrollers?paging[page]=" + functions.data.paging.page + "&paging[page_size]=" + functions.data.paging.page_size + "&order[" + orderField + "]=" + functions.data.order[orderField] + "&r=1";
+            var url = functions.data.values['controller-path'] + functions.data.values['action-path'] + "?paging[page]=" + functions.data.paging.page + "&paging[page_size]=" + functions.data.paging.page_size + "&order[" + orderField + "]=" + functions.data.order[orderField] + "&r=1";
             return url;
         },
         reload: function() {
@@ -222,10 +237,10 @@ $(document).ready( function() {
     }
     
     //functions.loading();
-    //setTimeout(function(){ 
+    //setTimeout(function(){
+    functions.loadValues()
     functions.reload();
     //}, 2000);     
-    
     
     $("body").on("click",".paging",function(e){
         e.preventDefault();

@@ -101,4 +101,8 @@
             </div>
           </div>
         </div>
+        <div id="javascript-data" class="hidden">
+            <span class="javascript-data" data-key="controller-path" data-value="/ff/appcontrollers"></span>
+            <span class="javascript-data" data-key="action-path" data-value="/"></span>
+        </div>
 

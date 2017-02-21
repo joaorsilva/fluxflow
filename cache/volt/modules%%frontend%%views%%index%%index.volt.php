@@ -28,7 +28,9 @@ What is
                 <div class="lead">
                     <p>FluxFlow&trade; is a mobile software platform that allows you to manage you business process flows in real time with no effort.</p>
                     <p>Configure business flows for each process that you want to manage and FluxFlow&trade; will show you the performance indicators of each step of your business flows.</p>
-                    <p>With FluxFlow&trade; you can easily improve the overal busniess performance. From lead to sale, from purchase to deliver. FluxFlow&trade; is an end-to-end process flow manager and analyzer.</p></div>
+                    <p>With FluxFlow&trade; you can easily improve the overall business performance. From lead to sale, from purchase to deliver. FluxFlow&trade; is an end-to-end process flow manager and analyzer.</p>
+                    <p>Improve your company performance, identify bottlenecks, difficulties and losses in you processes by start using FluxFlow&trade; today. </p>
+                </div>
                 <div><a class="btn btn-secondary" href="#pricing-area">INTERESTED?</a></div>
             </div>
         </div>
