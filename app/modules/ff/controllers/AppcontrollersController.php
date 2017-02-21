@@ -28,9 +28,22 @@ class AppcontrollersController extends ControllerBase
     
     public function indexAction()
     {
+      
         $this->tag->h3 = $this->titlePlural;
         $this->tag->title = $this->tag->h3 . " | ";
         $this->tag->h2 = "List of " . $this->titlePlural;
+        
+        $this->view->css = [
+            "/vendors/iCheck/skins/flat/green.css"
+        ];
+        
+        $this->view->js = [
+            "/vendors/iCheck/icheck.min.js",
+            "/build/js/custom.min.js",
+            "/js/modules/ff/layout/tables.js"
+        ];
+        
+        
     }
     
     public function viewAction()

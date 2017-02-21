@@ -6,6 +6,7 @@ class ApiParamQuery
     
     public static function prepareParams( array $params )
     {
+        //var_dump($params);die;
         $conditions = "";
         $bind       = array();
         $order      = "";

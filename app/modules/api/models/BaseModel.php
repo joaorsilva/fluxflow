@@ -60,11 +60,9 @@ class BaseModel extends \Phalcon\Mvc\Model
      * @param array $params
      * @return array
      */
-    
     public static function findStructured( array $params, $relations = FALSE )
     {
         $queryParams = ApiParamQuery::prepareParams( $params );
-        
         $countParams = array(
             'conditions'    => $queryParams['conditions'],
             'bind'          => $queryParams['bind']

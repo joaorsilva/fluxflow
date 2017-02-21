@@ -133,47 +133,50 @@ class CntcontactsController extends ControllerBase
             || !isset($post['unit_organizations_id'])
             || !isset($post['name'])
             || !isset($post['surename'])
-        ) 
-            $code = 400;
-        
-        $resource = new CntContacts();
-        $resource->setUserId($this->userId);
-        $resource->unit_organizations_id = $post['unit_organizations_id'];
-        
-        if(!isset($post['company_name']))
-            $resource->company_name = NULL;
-        else
-            $resource->company_name = $post['company_name'];
-        
-        if(!isset($post['user_users_id']))
-            $resource->user_users_id = NULL;
-        else
-            $resource->user_users_id = $post['user_users_id'];
-            
-        $resource->name = $post['name'];
-        $resource->surename = $post['surename'];
-        $resource->active = 1;
-        
-        if( isset($post['active']) )
-        {
-            $resource->active = $post['active'];
-        }
-        
-        if( $resource->create() === FALSE)
+        )
         {
             $code = 400;
-            $data = ['messages'  => $resource->getMessages()];
         }
-        else 
+        else
         {
-            if( !$resource->id ) $code = 500;
+            $resource = new CntContacts();
+            $resource->setUserId($this->userId);
+            $resource->unit_organizations_id = $post['unit_organizations_id'];
+
+            if(!isset($post['company_name']))
+                $resource->company_name = NULL;
+            else
+                $resource->company_name = $post['company_name'];
+
+            if(!isset($post['user_users_id']))
+                $resource->user_users_id = NULL;
+            else
+                $resource->user_users_id = $post['user_users_id'];
+
+            $resource->name = $post['name'];
+            $resource->surename = $post['surename'];
+            $resource->active = 1;
+
+            if( isset($post['active']) )
+            {
+                $resource->active = $post['active'];
+            }
+
+            if( $resource->create() === FALSE)
+            {
+                $code = 400;
+                $data = ['messages'  => $resource->getMessages()];
+            }
             else 
             {
-                $code = 201;
-                $data = ['data' => $resource->toArray()];
+                if( !$resource->id ) $code = 500;
+                else 
+                {
+                    $code = 201;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
-        
         return $this->sendResponse($code,$data); 
     }
 
@@ -192,40 +195,43 @@ class CntcontactsController extends ControllerBase
             || !isset($post['name'])
             || !isset($post['surename'])
         )
-            $code = 400;
-        
-        $resource = CntContacts::findFirst($id);
-        if( !$record )
-            $code = 404;
-        else 
         {
-            $record->setUserId($this->userId);
-            $resource->unit_organizations_id = $post['unit_organizations_id'];
-            if(isset($post['company_name']))
-                $resource->company_name = $post['company_name'];
-
-            if(isset($post['user_users_id']))
-                $resource->user_users_id = $post['user_users_id'];
-
-            $resource->name = $post['name'];
-            $resource->surename = $post['surename'];
-            if( isset($post['active']) )
-            {
-                $resource->active = $post['active'];
-            }
-            
-            if( $resource->update() === FALSE )
-            {
-                $code = 400;
-                $data = ['messages' => $resource->getMessages()];         
-            } 
+            $code = 400;
+        }
+        else
+        {
+            $resource = CntContacts::findFirst($id);
+            if( !$record )
+                $code = 404;
             else 
             {
-                $code = 200;
-                $data = ['data' => $resource->toArray()];
+                $record->setUserId($this->userId);
+                $resource->unit_organizations_id = $post['unit_organizations_id'];
+                if(isset($post['company_name']))
+                    $resource->company_name = $post['company_name'];
+
+                if(isset($post['user_users_id']))
+                    $resource->user_users_id = $post['user_users_id'];
+
+                $resource->name = $post['name'];
+                $resource->surename = $post['surename'];
+                if( isset($post['active']) )
+                {
+                    $resource->active = $post['active'];
+                }
+
+                if( $resource->update() === FALSE )
+                {
+                    $code = 400;
+                    $data = ['messages' => $resource->getMessages()];         
+                } 
+                else 
+                {
+                    $code = 200;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
-        
         return $this->sendResponse($code,$data);         
     }
 

@@ -106,20 +106,20 @@ class ControllerBase extends Controller
      */
     public function parseSettings( Request $request, $model ) 
     {
-        $val = $request->getQuery( 'page' , 'int' );
-        if(!is_null($val))
+        $val = $request->getQuery( 'paging' );
+
+        if(isset($val['page']))
         {    
-            $this->settings['page'] = $val;
+            $this->settings['paging']['page'] = (int)$val['page'];
         }
         
-        $val = $request->getQuery( 'page_size' , 'int' );
-        if(!is_null($val))
+        if(isset($val['page_size']))
         {   
-            if( $val > ControllerBase::MAX_PAGE_SIZE )
+            if( $val['page_size'] > ControllerBase::MAX_PAGE_SIZE )
             {
-                $val = ControllerBase::MAX_PAGE_SIZE;
+                $val['page_size'] = ControllerBase::MAX_PAGE_SIZE;
             }
-            $this->settings['page_size'] = $val;
+            $this->settings['paging']['page_size'] = (int)$val['page_size'];
         }
         
         $val = $request->getQuery( 'filter');
@@ -128,7 +128,7 @@ class ControllerBase extends Controller
             $this->settings['filter'] = $this->validateFieldArray( $val , "Fluxflow\\Modules\\Api\\Models\\" . $model );
         }
         
-        $val = $request->getQuery('order','string');
+        $val = $request->getQuery('order');
         if( !is_null( $val ) && is_array( $val ) )
         {
             $this->settings['order'] = $this->validateFieldArray( $val , "Fluxflow\\Modules\\Api\\Models\\" . $model );
@@ -189,6 +189,7 @@ class ControllerBase extends Controller
                 {
                     if( strtolower( $value ) == 'asc' || strtolower( $value ) == 'desc' )
                     {
+                        $newArray[$key] = $value;
                         continue;
                     }
                 }
@@ -236,6 +237,7 @@ class ControllerBase extends Controller
                 return FALSE;
             }
         }
+        
         return TRUE;
     }
     

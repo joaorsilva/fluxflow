@@ -29,15 +29,16 @@ class AppcontrollersController extends ControllerBase
      */
     private $validParams = array(
         '_url',
-        'pagging',
+        'paging',
         'filter',
-        'order'
+        'order',
+        'r'
     );
     
     /*
      * Id of the user performing the operation
      */
-    private $userId = 1;
+    private $user;
     
     /**
      * Initialize the controller once
@@ -54,7 +55,8 @@ class AppcontrollersController extends ControllerBase
     {
         $auth = $this->session->get('auth');
         if($auth && isset($auth['user']))
-            $this->userId = $auth['user']->id;
+            $this->user = $auth['user'];
+        AppControllers::setUser($this->user);
     }
 
     /**
@@ -66,38 +68,48 @@ class AppcontrollersController extends ControllerBase
     {
         $requestSetting = array();
         $data = array();
-        
-        if( !$this->validateParams( $this->request->getQuery(), $this->validParams ) )
+          
+        $params = $this->request->getQuery();
+        if( !$this->validateParams( $params, $this->validParams ) )
+        {
              $code = 400;
-        
-        if($id)
-        {
-            //Single record
-            $record = AppControllers::findFirst($id);
-            if( !$record) 
-                $code = 404;
-            else
-            {
-                $code = 200;
-                $data = ["data" => $record->toArray()];
-            }
         }
-        else 
+        else
         {
-            //Recordset to find
-            $requestSetting = $this->parseSettings( $this->request, AppControllers );
-            
-            $struct = AppControllers::findStructured($requestSetting);
+            $relations = FALSE;
+            if(isset($params['r']))
+            {
+                $relations = TRUE;
+            }
 
-            if( count($struct['result']) == 0)
-                $code = 404;
-            else
+            if($id)
             {
-                $code = 200;
-                $data = ["data" => $struct];    
+                //Single record
+                $record = AppControllers::findFirst($id, $relations);
+                if( !$record) 
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $record->toArray()];
+                }
+            }
+            else 
+            {
+                //Recordset to find
+                $requestSetting = $this->parseSettings( $this->request, AppControllers );
+
+                $struct = AppControllers::findStructured($requestSetting, $relations);
+
+                if( count($struct['result']) == 0)
+                    $code = 404;
+                else
+                {
+                    $code = 200;
+                    $data = ["data" => $struct];    
+                }
             }
         }
-        
         return $this->sendResponse($code,$data);        
     }
     
@@ -118,35 +130,38 @@ class AppcontrollersController extends ControllerBase
             || !isset($post['name'])
             || !isset($post['key'])
         ) 
-            $code = 400;
-        
-        $resource = new AppControllers();
-        $resource->setUserId($this->userId);
-        $resource->app_modules_id = $post['app_modules_id'];
-        $resource->name = $post['name'];
-        $resource->key = $post['key'];
-        $resource->active = 1;
-        
-        if( isset($post['active']) )
-        {
-            $resource->active = $post['active'];
-        }
-        
-        if( $resource->create() === FALSE)
         {
             $code = 400;
-            $data = ['messages'  => $resource->getMessages()];
         }
-        else 
+        else
         {
-            if( !$resource->id ) $code = 500;
+            $resource = new AppControllers();
+            $resource->setUserId($this->userId);
+            $resource->app_modules_id = $post['app_modules_id'];
+            $resource->name = $post['name'];
+            $resource->key = $post['key'];
+            $resource->active = 1;
+
+            if( isset($post['active']) )
+            {
+                $resource->active = $post['active'];
+            }
+
+            if( $resource->create() === FALSE)
+            {
+                $code = 400;
+                $data = ['messages'  => $resource->getMessages()];
+            }
             else 
             {
-                $code = 201;
-                $data = ['data' => $resource->toArray()];
+                if( !$resource->id ) $code = 500;
+                else 
+                {
+                    $code = 201;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
-        
         return $this->sendResponse($code,$data); 
     }
 
@@ -165,34 +180,37 @@ class AppcontrollersController extends ControllerBase
             || !isset($post['name'])
             || !isset($post['key'])
         )
-            $code = 400;
-        
-        $resource = AppControllers::findFirst($id);
-        if( !$record )
-            $code = 404;
-        else 
         {
-            $record->setUserId($this->userId);
-            $resource->app_modules_id = $post['app_modules_id'];
-            $resource->name = $post['name'];
-            $resource->key = $post['key'];
-            if( isset($post['active']) )
-            {
-                $resource->active = $post['active'];
-            }
-            
-            if( $resource->update() === FALSE )
-            {
-                $code = 400;
-                $data = ['messages' => $resource->getMessages()];         
-            } 
+            $code = 400;
+        }
+        else
+        {
+            $resource = AppControllers::findFirst($id);
+            if( !$record )
+                $code = 404;
             else 
             {
-                $code = 200;
-                $data = ['data' => $resource->toArray()];
+                $record->setUserId($this->userId);
+                $resource->app_modules_id = $post['app_modules_id'];
+                $resource->name = $post['name'];
+                $resource->key = $post['key'];
+                if( isset($post['active']) )
+                {
+                    $resource->active = $post['active'];
+                }
+
+                if( $resource->update() === FALSE )
+                {
+                    $code = 400;
+                    $data = ['messages' => $resource->getMessages()];         
+                } 
+                else 
+                {
+                    $code = 200;
+                    $data = ['data' => $resource->toArray()];
+                }
             }
         }
-        
         return $this->sendResponse($code,$data);         
     }
 

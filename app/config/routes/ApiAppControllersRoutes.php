@@ -24,7 +24,7 @@ $router = $di->getRouter();
 $cdata = [
     'namespace'=>   "Fluxflow\Modules\Api\Controllers",
     'module'=>      "api",
-    'controller'=>  "appcontrol"
+    'controller'=>  "appcontrollers"
 ];
 
 $route = '/' . $cdata['module'] . '/' . $cdata['controller'];
