@@ -12,7 +12,8 @@ $(document).ready( function() {
             order: {
                 id:"asc"
             },
-            values: {}
+            values: {},
+            selectedRows: {}
         },
         loadValues: function()
         {
@@ -55,9 +56,11 @@ $(document).ready( function() {
                     html += "   <td class=\"\">" + item.app_modules_id.name + "</td>";
                     html += "   <td class=\"a-center\">" + active + "</td>";
                     html += "   <td class=\"a-center\">" + deleted + "</td>";
-                    html += "   <td class=\"last\">";
+                    html += "   <td class=\"last\" style=\"text-align:right;\">";
                     html += "       <div class=\"btn-group\">";
-                    html += "           <a class=\"btn btn-success\" href=\"\">"
+                    html += "           <a class=\"btn btn-success\" title=\"View\" href=\"" + functions.data.values['api-controller-path'] + "/view/" + item.id + "\"><i class=\"fa fa-desktop\"></i></a>";
+                    html += "           <a class=\"btn btn-warning\" href=\"" + functions.data.values['api-controller-path'] + "/edit/" + item.id + "\"><i class=\"fa fa-pencil-square-o\"></i></a>";
+                    html += "           <a class=\"btn btn-danger btn-delete\" data-id=\"" + item.id + "\"><i class=\"fa fa-trash-o\"></i></a>";
                     html += "       </div>";
                     html += "   </td>";
                     html += "</tr>";
@@ -65,6 +68,9 @@ $(document).ready( function() {
                 });
                 $("input.flat").iCheck({checkboxClass:"icheckbox_flat-green",radioClass:"iradio_flat-green"})
             }
+            
+            $("#bulk-new").attr("href",functions.data.values['controller-path']+"/edit");
+            
             functions.makeSort();
             functions.makePagination();
         },
@@ -140,9 +146,11 @@ $(document).ready( function() {
             }
         },
         makeUrl: function() {
+            
             functions.data.paging.pageSize = $("#page-size").val();
             var orderField = Object.keys(functions.data.order)[0];
-            var url = functions.data.values['controller-path'] + functions.data.values['action-path'] + "?paging[page]=" + functions.data.paging.page + "&paging[page_size]=" + functions.data.paging.page_size + "&order[" + orderField + "]=" + functions.data.order[orderField] + "&r=1";
+            var url = functions.data.values['api-controller-path'] + functions.data.values['api-action-path'] + "?paging[page]=" + functions.data.paging.page + "&paging[page_size]=" + functions.data.paging.page_size + "&order[" + orderField + "]=" + functions.data.order[orderField] + "&r=1";
+            console.log(url);
             return url;
         },
         reload: function() {
@@ -236,12 +244,6 @@ $(document).ready( function() {
         }
     }
     
-    //functions.loading();
-    //setTimeout(function(){
-    functions.loadValues()
-    functions.reload();
-    //}, 2000);     
-    
     $("body").on("click",".paging",function(e){
         e.preventDefault();
         var page = $(this).attr("data-page");
@@ -268,8 +270,55 @@ $(document).ready( function() {
         }
         
         functions.reload();
-        
     });
+    
+    $("body").on("click",".btn-delete", function(e) {
+        e.preventDefault();
+        
+        $('.table-delete-modal .modal-body table').remove();
+        
+        var html = "";
+        var id = $(this).attr("data-id");
+        var tr = null;
+        var name = "";
+            html="<table style=\"width:100%\">";
+            html+="<thead>";
+            html+="<tr>";
+            html+="<th>";
+            html+=$("#table-records > thead > .headings > th:nth-child(2)").text();
+            html+="</th>";
+            html+="<th>";
+            html+=$("#table-records > thead > .headings > th:nth-child(3)").text();
+            html+="</th>";
+            html+="</thead>";
+            html+="<tbody>";
+        if(id) {
+            tr = $(this).parent().parent().parent();
+            name = tr.find("td:nth-child(3)").text();
+            functions.data.selectedRows = [{id:id,name:name}];
+            
+            html+="<tr><td>" + functions.data.selectedRows[0]["id"] + "</td><td>" + functions.data.selectedRows[0]["name"] + "</td></tr>";
+        } else {
+            var elements = $("#table-records input:checked");
+            $.each(elements, function(key,element){
+                id = $(this).attr("data-id")
+                tr = $(this).parent().parent().parent();
+                name = tr.find("td:nth-child(3)").text();
+                functions.data.selectedRows = [{id:id,name:name}];
+                html+="<tr><td>" + id + "</td><td>" + name + "</td></tr>";
+                
+            });
+        }
+
+        html+="</tbody>";
+        html+="</table>";
+        $('.table-delete-modal .modal-body').append(html);
+        $('.table-delete-modal').modal('show');
+    });
+    
+    functions.loadValues();
+    functions.reload();
+    
 });
 
 

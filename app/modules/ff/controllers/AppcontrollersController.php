@@ -34,16 +34,15 @@ class AppcontrollersController extends ControllerBase
         $this->tag->h2 = "List of " . $this->titlePlural;
         
         $this->view->css = [
-            "/vendors/iCheck/skins/flat/green.css"
+            "/vendors/iCheck/skins/flat/green.css",
+            "/css/modules/ff/common.css"
         ];
         
         $this->view->js = [
             "/vendors/iCheck/icheck.min.js",
-            "/build/js/custom.min.js",
+            //"/build/js/custom.min.js",
             "/js/modules/ff/layout/tables.js"
         ];
-        
-        
     }
     
     public function viewAction()
@@ -53,9 +52,16 @@ class AppcontrollersController extends ControllerBase
         $this->tag->h2 = $this->titleSinglular;
     }
     
-    public function editAction()
+    public function editAction($id)
     {
-        $this->tag->h3 = "Edit " . $this->titleSinglular;
+        
+        if(!isset($id))
+        {
+            $this->tag->h3 = "New " . $this->titleSinglular;
+        } else {
+            $this->tag->h3 = "Edit " . $this->titleSinglular;
+        }
+        
         $this->tag->title = $this->tag->h3 . " | ";
         $this->tag->h2 = $this->titleSinglular;
     }
